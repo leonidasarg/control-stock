@@ -1,0 +1,1479 @@
+<title>Stock al Día</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #eef0ee;
+    --surface: #ffffff;
+    --surface-sunken: #e6e9e5;
+    --ink: #1e2422;
+    --ink-muted: #5b655e;
+    --ink-faint: #8b968e;
+    --border: #d3d8d1;
+    --border-strong: #b7bfb4;
+    --accent: #2c5a82;
+    --accent-strong: #1f435f;
+    --accent-wash: #e3edf4;
+    --good: #2e8b57;
+    --good-wash: #e3f3ea;
+    --warn: #b8790f;
+    --warn-wash: #faf0dc;
+    --bad: #c0392b;
+    --bad-wash: #fbe8e5;
+    --shadow: 0 1px 2px rgba(30, 36, 34, 0.06), 0 8px 24px -12px rgba(30, 36, 34, 0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181a;
+      --surface: #1b2124;
+      --surface-sunken: #171c1e;
+      --ink: #e8ebe7;
+      --ink-muted: #9aa5a0;
+      --ink-faint: #6d7873;
+      --border: #2c3436;
+      --border-strong: #3b4547;
+      --accent: #79aed9;
+      --accent-strong: #9dc6e8;
+      --accent-wash: #1e2c36;
+      --good: #55b47f;
+      --good-wash: #17281f;
+      --warn: #e0a83d;
+      --warn-wash: #2c2415;
+      --bad: #e07a68;
+      --bad-wash: #2e1c19;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 28px -12px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14181a;
+    --surface: #1b2124;
+    --surface-sunken: #171c1e;
+    --ink: #e8ebe7;
+    --ink-muted: #9aa5a0;
+    --ink-faint: #6d7873;
+    --border: #2c3436;
+    --border-strong: #3b4547;
+    --accent: #79aed9;
+    --accent-strong: #9dc6e8;
+    --accent-wash: #1e2c36;
+    --good: #55b47f;
+    --good-wash: #17281f;
+    --warn: #e0a83d;
+    --warn-wash: #2c2415;
+    --bad: #e07a68;
+    --bad-wash: #2e1c19;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 28px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Source Sans 3', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  header.top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--border-strong);
+  }
+
+  .brand-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 6px;
+  }
+
+  h1 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 700;
+    font-size: clamp(28px, 4vw, 38px);
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface-sunken);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .tab {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .tab:hover { color: var(--ink); }
+
+  .tab.active {
+    background: var(--surface);
+    color: var(--accent-strong);
+    box-shadow: var(--shadow);
+  }
+
+  .tab:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 760px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 24px;
+  }
+
+  .card h2 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin: 0 0 4px;
+  }
+
+  .card .hint {
+    color: var(--ink-muted);
+    font-size: 14px;
+    margin: 0 0 20px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-muted);
+  }
+
+  .field input {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface-sunken);
+    color: var(--ink);
+    width: 100%;
+  }
+
+  .field input:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+
+  .code-field { margin-bottom: 16px; }
+
+  .code-field input {
+    font-size: 16px;
+  }
+
+  .product-status {
+    min-height: 4px;
+    font-size: 13.5px;
+    margin-top: 2px;
+  }
+
+  .product-status.found {
+    color: var(--ink-muted);
+  }
+
+  .product-status .name {
+    color: var(--accent-strong);
+    font-weight: 600;
+  }
+
+  .product-status.unknown .flag {
+    color: var(--warn);
+    font-weight: 600;
+  }
+
+  .quick-add {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .quick-add input {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    padding: 8px 10px;
+    border-radius: 7px;
+    border: 1.5px solid var(--border);
+    background: var(--surface-sunken);
+    color: var(--ink);
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .quick-add .btn { padding: 8px 14px; font-size: 14px; white-space: nowrap; }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .field input::-webkit-outer-spin-button,
+  .field input::-webkit-inner-spin-button {
+    opacity: 0.5;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    border-radius: 8px;
+    padding: 11px 18px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: transform 0.08s ease, filter 0.15s ease;
+  }
+
+  .btn:active { transform: translateY(1px); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-primary:hover { filter: brightness(1.08); }
+
+  .btn-ghost {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--ink-muted);
+  }
+
+  .btn-ghost:hover { border-color: var(--border-strong); color: var(--ink); }
+
+  /* Result / stamp card */
+  .result-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+  }
+
+  .result-product {
+    align-self: flex-start;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink-muted);
+    min-height: 20px;
+  }
+
+  .result-product .code {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--accent-strong);
+    font-weight: 500;
+  }
+
+  .result-product.warn { color: var(--warn); }
+
+  .result-figures {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+  }
+
+  .result-figures .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .result-figures .row span:first-child { color: var(--ink-muted); }
+  .result-figures .row span:last-child { font-variant-numeric: tabular-nums; font-weight: 500; }
+
+  .result-figures .row.total span:last-child {
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .stamp {
+    width: 168px;
+    height: 168px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid currentColor;
+    position: relative;
+    transform: rotate(-7deg);
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .stamp::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    opacity: 0.55;
+  }
+
+  .stamp-text {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.15;
+    text-wrap: balance;
+    max-width: 110px;
+  }
+
+  .stamp.state-neutral { color: var(--ink-faint); }
+  .stamp.state-good { color: var(--good); }
+  .stamp.state-warn { color: var(--warn); }
+  .stamp.state-bad { color: var(--bad); }
+
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .status-chip.state-good { background: var(--good-wash); color: var(--good); }
+  .status-chip.state-warn { background: var(--warn-wash); color: var(--warn); }
+  .status-chip.state-bad { background: var(--bad-wash); color: var(--bad); }
+
+  .status-chip .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .code-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    background: var(--accent-wash);
+    color: var(--accent-strong);
+    padding: 2px 7px;
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  /* History */
+  .history-section { margin-top: 32px; }
+
+  .history-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .history-header h2 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 21px;
+    margin: 0;
+  }
+
+  .history-header .count {
+    color: var(--ink-faint);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+  }
+
+  .search-row { margin-bottom: 12px; }
+
+  .search-row input {
+    width: 100%;
+    max-width: 360px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 14px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 880px;
+  }
+
+  thead th {
+    text-align: left;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    padding: 12px 14px;
+    border-bottom: 1.5px solid var(--border-strong);
+    background: var(--surface-sunken);
+    white-space: nowrap;
+  }
+
+  thead th:first-child { border-top-left-radius: 14px; }
+  thead th:last-child { border-top-right-radius: 14px; }
+
+  tbody td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  tbody td.datetime {
+    font-family: 'Source Sans 3', sans-serif;
+    color: var(--ink-muted);
+    font-size: 13px;
+  }
+
+  tbody td.producto-name {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13.5px;
+    color: var(--ink);
+    white-space: normal;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--surface-sunken); }
+
+  .diff-pos { color: var(--warn); }
+  .diff-neg { color: var(--bad); }
+  .diff-zero { color: var(--good); }
+
+  td.del-cell { text-align: right; }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 4px 6px;
+    border-radius: 6px;
+  }
+
+  .del-btn:hover { color: var(--bad); background: var(--bad-wash); }
+
+  .empty-state {
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--ink-faint);
+    font-size: 14px;
+  }
+
+  .empty-state strong {
+    display: block;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 17px;
+    color: var(--ink-muted);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .clear-link {
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    font-size: 12.5px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .clear-link:hover { color: var(--bad); }
+
+  /* Products modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 19, 17, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 50;
+  }
+
+  .modal-overlay[hidden] { display: none; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 480px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .modal-header h2 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin: 0;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--ink-faint);
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+  }
+
+  .modal-close:hover { color: var(--ink); }
+
+  .product-add-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .product-add-form input {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    padding: 9px 10px;
+    border-radius: 7px;
+    border: 1.5px solid var(--border);
+    background: var(--surface-sunken);
+    color: var(--ink);
+    flex: 1;
+    min-width: 90px;
+  }
+
+  .product-add-form input.name-input {
+    font-family: 'Source Sans 3', sans-serif;
+    flex: 1.8;
+  }
+
+  .product-list {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--border);
+  }
+
+  .product-list-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 2px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .product-list-item .pname { flex: 1; font-size: 14px; }
+
+  .product-list-empty {
+    color: var(--ink-faint);
+    font-size: 13.5px;
+    text-align: center;
+    padding: 24px 0;
+  }
+</style>
+
+<div class="page">
+  <header class="top">
+    <div>
+      <p class="brand-eyebrow">Control de existencias</p>
+      <h1>Stock al Día</h1>
+    </div>
+    <div class="top-actions">
+      <nav class="tabs" id="tabs" role="tablist" aria-label="Depósito"></nav>
+      <button type="button" class="btn btn-ghost" id="open-products">Productos</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="card">
+      <h2>Nuevo cálculo</h2>
+      <p class="hint">Elegí el artículo por código y cargá sus movimientos en el depósito.</p>
+      <form id="calc-form">
+        <div class="field code-field">
+          <label for="codigo">Código de producto</label>
+          <input type="text" id="codigo" placeholder="Ej: 1042" autocomplete="off" required>
+          <div class="product-status" id="product-status"></div>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="inicial">Stock inicial</label>
+            <input type="number" id="inicial" inputmode="decimal" step="any" placeholder="0" required>
+          </div>
+          <div class="field">
+            <label for="finalReal">Stock final (contado)</label>
+            <input type="number" id="finalReal" inputmode="decimal" step="any" placeholder="0" required>
+          </div>
+          <div class="field">
+            <label for="compras">Compras</label>
+            <input type="number" id="compras" inputmode="decimal" step="any" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="ventas">Ventas</label>
+            <input type="number" id="ventas" inputmode="decimal" step="any" placeholder="0">
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="save-btn">Calcular y registrar</button>
+          <button type="button" class="btn btn-ghost" id="reset-btn">Limpiar</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card result-card">
+      <h2 style="align-self:flex-start;">Resultado</h2>
+      <div class="result-product" id="result-product"></div>
+      <div class="stamp state-neutral" id="stamp">
+        <div>
+          <div class="stamp-text" id="stamp-text">Cargá<br>los datos</div>
+        </div>
+      </div>
+      <div class="result-figures">
+        <div class="row"><span>Stock esperado</span><span id="fig-esperado">—</span></div>
+        <div class="row"><span>Stock contado</span><span id="fig-real">—</span></div>
+        <div class="row total"><span>Diferencia</span><span id="fig-diff">—</span></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="history-section">
+    <div class="history-header">
+      <h2>Historial — <span id="history-deposito">Chamical</span></h2>
+      <span class="count" id="history-count"></span>
+    </div>
+    <div class="search-row">
+      <input type="text" id="search-input" placeholder="Buscar por código o nombre de producto…">
+    </div>
+    <div class="table-wrap" id="table-wrap"></div>
+    <div style="margin-top:10px; text-align:right;">
+      <button class="clear-link" id="clear-history">Borrar historial de este depósito</button>
+    </div>
+  </section>
+</div>
+
+<div class="modal-overlay" id="products-modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="products-modal-title">
+    <div class="modal-header">
+      <h2 id="products-modal-title">Productos</h2>
+      <button type="button" class="modal-close" id="close-products" aria-label="Cerrar">✕</button>
+    </div>
+    <form class="product-add-form" id="product-add-form">
+      <input type="text" id="new-codigo" placeholder="Código" required>
+      <input type="text" id="new-nombre" class="name-input" placeholder="Nombre del producto" required>
+      <button type="submit" class="btn btn-primary">Agregar</button>
+    </form>
+    <div class="product-list" id="product-list"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var DEPOSITOS = ['Chamical', 'Chepes', 'Villa Unión'];
+  var STORAGE_KEY = 'stock-al-dia-v1';
+  var PRODUCTS_KEY = 'stock-al-dia-productos-v1';
+
+  var SEED_PRODUCTS = {
+    "101": "COCA-COLA 350*24 VR",
+    "103": "COCA-COLA 1000*08 VR",
+    "104": "COCA-COLA 1500*8 VR",
+    "116": "COCA-COLA 375*12 PET CT",
+    "118": "COCA-COLA 375ML*6 PET",
+    "120": "COCA-COLA 600*12 PET",
+    "125": "COCA-COLA 2000*8 RPET",
+    "130": "COCA-COLA 2500*8 RPET",
+    "145": "COCA-COLA 20LTS.BIB",
+    "173": "COCA-COLA 354*6 LATAS",
+    "181": "COCA-COLA 220*6 LATAS",
+    "189": "COCA-COLA LS 2.5L NR 6PET",
+    "326": "COCA-COLA LS 1500*6 PET CT",
+    "327": "COCA-COLA LS 2.25L NR 6PET",
+    "331": "COCA-COLA LS 3.0L NR 6PET",
+    "603": "COCA-COLA ZERO 1000*08 VR",
+    "608": "COCA-COLA ZERO 350*24VR",
+    "614": "COCA-COLA ZERO 1500*8 VR",
+    "615": "COCA-COLA ZERO 2000*8 RPET",
+    "623": "COCA-COLA ZERO 600*06 PET",
+    "630": "COCA-COLA ZERO 2500*8 RPET",
+    "631": "COCA-COLA ZERO 375*6 DECORADO",
+    "636": "COCA-COLA ZERO 220*6 LATAS",
+    "652": "COCA-COLA ZERO 1500*6CT",
+    "655": "COCA-COLA ZERO 2250*6 PC",
+    "656": "COCA-COLA ZERO 2000*6CT",
+    "676": "COCA-COLA ZERO 354*6 LATAS",
+    "683": "COCA-COLA ZERO 10LT BIB",
+    "688": "COCA COLA ZERO FIFA 473ML*6L",
+    "1101": "FANTA NARANJA 350*24 VR",
+    "1103": "FANTA NARANJA 1000*08 VR",
+    "1104": "FANTA NARANJA 1500*8 VR",
+    "1110": "FANTA NARANJA 500*06 PET",
+    "1118": "FANTA NARANJA 375*6 PET",
+    "1121": "FANTA NARANJA 3000*6 PSW",
+    "1125": "FANTA NARANJA 2L*8 RPET",
+    "1130": "FANTA NARANJA 2500*8 RPE",
+    "1174": "FANTA NARANJA 220*6 LATAS",
+    "1190": "FANTA NARANJA 1500*6 PMP",
+    "1195": "FANTA NARANJA 2250*6 PMP",
+    "1268": "FANTA POMELO NF 2500*6 PET",
+    "1408": "FANTA LIMON DULCE 500*6 PET",
+    "1489": "FANTA LIMON DULCE 2500*6 PET",
+    "1503": "FANTA MANZANA 1000*08 VR",
+    "1508": "FANTA MANZANA 500*06 PET",
+    "1589": "FANTA MANZANA 2500*6 PMP",
+    "1645": "FANTA NARANJA ZERO 10LTS BIB",
+    "1650": "FANTA ZERO 1.5*6 MP",
+    "1675": "FANTA NARANJA ZERO 354*6 LATAS",
+    "1703": "FANTA MISTERIO CHUCKY 473ML*6L",
+    "1775": "FANTA CARMESI XBOX 354*6 LATAS",
+    "2086": "SANTA FLORENTINA TORRONTES R. 12*375",
+    "2101": "SANTA FLORENTINA RESERVA TORRONTES RIOJANO 6X750",
+    "2102": "SANTA FLORENTINA RESERVA MALBEC 6X750",
+    "2112": "LIMOUSIN RESERVA MALBEC 6X750",
+    "2201": "NACARI ESMERILADO ANIVERSARIO TORR 6*750",
+    "2230": "NACARI ESMERILADO EST. MAD 1*750 TORRONTES",
+    "2301": "SPRITE FX LS 350*24 VR",
+    "2304": "SPRITE FX LS 1500*8 VR",
+    "2313": "LIMOUSIN 50 BONARDA 6X750",
+    "2403": "SPRITE FX LS 1000*08 VR",
+    "2408": "SPRITE FX LS 500ML NR 06PET",
+    "2418": "SPRITE FX LS 375ML NR 6PET",
+    "2421": "SPRITE FX LS 1.5L NR 6PET",
+    "2422": "NAMPE MALBEC CJ 6X750ML",
+    "2425": "SPRITE FX LS 2.0LTS 8RP",
+    "2427": "SPRITE FX LS 2.25L NR 6PET",
+    "2430": "SPRITE FX LS 2.5LTS 8RP",
+    "2431": "SPRITE FX LS 3.0L NR 6PET",
+    "2445": "SPRITE FX ZERO 10 L. BIB",
+    "2466": "SANTA FLORENTINA TARDIO OTOÑAL TTES. RIOJANO 6X750",
+    "2475": "SPRITE F LS 354* 6 LATAS",
+    "2476": "SPRITE FX LS 220ML*6LATAS",
+    "2491": "SPRITE FX ZERO 1500*6 PCT",
+    "2505": "RAZA ARGENTINA BICENTENARIO 6X750CM3 MALBEC",
+    "2506": "RAZA ARGENTINA BICENTENARIO 6X750CM3 TORRONTES",
+    "2520": "RAZA ARGENTINA MALBEC 6*750",
+    "2521": "RAZA ARGENTINA TORRONTES 6*750",
+    "2524": "RAZA ARGENTINA MALBEC SUPPREM ESTCARTON 1X750",
+    "2525": "RAZA ARGENTINA MALBEC SUPPREM ESTCARTON 3X750",
+    "2526": "RAZA ARGENTINA MALBEC SUPPREM ESTCARTON 6X750",
+    "2680": "BENEDICTINO SIN GAS 500*15 VR",
+    "2681": "BENEDICTINO SIN GAS 600*12 PET",
+    "2682": "BENEDICTINO SIN GAS 2000*6 PET",
+    "2683": "BENEDICTINO SIN GAS 6.25LTS PE",
+    "2684": "BENEDICTINO SIN GAS 3000*6 PET",
+    "2700": "TILIMUQUI TORRONTES RIOJANO 6X750",
+    "2710": "TILIMUQUI MALBEC 6X750",
+    "2720": "TILIMUQUI BONARDA 6X750",
+    "2723": "TILIMUQUI ESPUMANTE ZERO ALCOHOL 6*750",
+    "2730": "SANTA FLORENTINA BONARDA 6*750",
+    "2780": "BENEDICTINO C/GAS 500*15 VR",
+    "2781": "BENEDICTINO C/G 600*12 PET",
+    "2782": "SIFON SODA BENEDICTINO 2000*6P",
+    "2783": "SODA BENEDICTINO 2000*6",
+    "2800": "RAZA ARGENTINA TARDIO OTOÑAL 6*500",
+    "3009": "SANTA FLORENTINA BRUT DE TORRONTES RIOJANO 6X750",
+    "3020": "RAZA ARGENTINA DULCE NATURAL TORR 6*750",
+    "3021": "SCHWEPPES POMELO ZERO 1500*6",
+    "3024": "SCHWEPPES POMELO ZERO 310ML*6L",
+    "3050": "SANTA FLORENTINA BONARDA 12*375",
+    "3124": "SCHWEPPES TONICA 310ML*6L",
+    "3151": "SCHWEPPES TONICA 1500*6P",
+    "3297": "CRUSH NARANJA 3000*6 PSW",
+    "3397": "CRUSH POMELO 3000*6 PSW",
+    "3496": "CRUSH LIMA-LIMON S/A 3,0*6 PSW",
+    "3596": "CRUSH MANZANA SA 3.0L*6B PET",
+    "3822": "CEPITA FRESH NARANJA 500*06PET",
+    "3827": "CEPITA FRESH POMELO 500*06PET",
+    "3834": "CEPITA FRESH MANZANA 1.5L 6PET",
+    "3835": "CEPITA FRESH NARANJA 1.5L 6PET",
+    "3836": "CEPITA FRESH POMELO 1.5L 6PET",
+    "3838": "CEPITA FRESH NARANJA 3.0L 6PET",
+    "3839": "CEPITA FRESH POMELO 3.0L 6PET",
+    "3840": "CEPITA NARANJA 300*6 PET",
+    "3842": "CEPITA DURAZNO 300*6 PET",
+    "3845": "CEPITA NARANJA 1.5*4 PET",
+    "3846": "CEPITA ANANA 1.5*4 PET",
+    "3847": "CEPITA DURAZNO 1.5*4 PET",
+    "3848": "CEPITA MANZANA 1.5*4 PET",
+    "3850": "CEPITA NARANJA 1.0L*6PET",
+    "3852": "CEPITA DURAZNO 1.0L*6PET",
+    "3860": "MONSTER ENERGY GREEN 473ML*6L",
+    "3861": "MONSTER ENERGY ULTRA 473ML*6L",
+    "3862": "MONSTER E.MANGO LOCO 473ML*6L",
+    "3865": "MONSTER E.ULTRA SUNRI 473ML*6L",
+    "3866": "MONSTER ENERGY ROSSI 473ML*6L",
+    "3867": "MONSTER E.U WATERMEL. 473ML*6L",
+    "3868": "MONSTER RE. PINEAPPLE 473ML*6L",
+    "3869": "MONSTER E. GREEN ZERO 473ML*6L",
+    "3870": "MONSTER PIPELINE PUNCH 473ML*6",
+    "3872": "MONSTER PEACHY KEEN 473ML*6L",
+    "3920": "CEPITA MANZANA 25% 200ML 6TB",
+    "3923": "CEPITA MULTIFR. 25% 200ML 6TB",
+    "3924": "CEPITA NARANJA 25% 200ML 6TB",
+    "3993": "CEPITA MANZANA 25% 1000*06TB",
+    "3995": "CEPITA MULTIF. 25% 1000*06TB",
+    "3997": "CEPITA NARANJA 25% 1000*06TB",
+    "4053": "POWERADE MANZANA 0,5L*6 PET",
+    "4055": "POWER.MOUNTAIN BLAST 0,5*6 PE",
+    "4059": "POWERADE FRUTAS TROP.0,5L*6 P",
+    "4067": "POWERADE UVA 0,5L*6 PET",
+    "4070": "POWERADE SOUR GREEN 0,5L*6 PET",
+    "4071": "POWERADE COOL CITRUS 0,5*6 PET",
+    "4075": "POWER.MOUNTAIN BLAST 995*6 PET",
+    "4076": "POWERADE MANZANA 995*6 PET",
+    "4079": "POWERADE FRUTAS TROP.995*6 PET",
+    "4207": "AQUARIUS POMELO 0,5L*06PET",
+    "4209": "AQUARIUS NARANJA 0,5L*06PET",
+    "4211": "AQUARIUS MANZANA 0,5L*06PET",
+    "4213": "AQUARIUS POM.ROSADO 0,5L*06PET",
+    "4215": "AQUARIUS PERA 0,5L*06PET",
+    "4218": "AQUARIUS PERA 500*15 VR",
+    "4219": "AQUARIUS POM.ROSADO 500*15 VR",
+    "4220": "AQUARIUS ANANA+JENG.1,5L*6 PET",
+    "4221": "AQUARIUS POMELO 1,5L*6 PET",
+    "4222": "AQUARIUS UVA VERDE 1,5L*6 PET",
+    "4223": "AQUARIUS PERA 1,5L*6 PET",
+    "4225": "AQUARIUS MANZANA 1,5L*6 PET",
+    "4226": "AQUARIUS LIMONADA 1,5L*6 PET",
+    "4227": "AQUARIUS NARANJA 1,5L*6 PET",
+    "4230": "AQUARIUS POM.ROSADO 1,5L*6 PET",
+    "4231": "AQUARIUS POMELO 2,25L*6",
+    "4233": "AQUARIUS PERA 2,25L*6 PET",
+    "4235": "AQUARIUS MANZANA 2,25L*6 PE",
+    "4236": "AQUARIUS LIMONADA 2,25L*6 PET",
+    "4237": "AQUARIUS NARANJA 2,25L*6 PET",
+    "4240": "AQUARIUS POM.ROSADO 2,25L*6PET",
+    "4247": "AQUARIUS POMELO 2.0L RPET 8B",
+    "4261": "AQUARIUS POMELO 2.5L RPET 8B",
+    "4263": "AQUARIUS PERA 2.5L RPET 8B",
+    "4269": "AQUARIUS POM.ROSADO 2.5LRP 8B",
+    "4292": "AQUARIUS POMELO 375*6 PET",
+    "4294": "AQUARIUS PERA 375*6 PET",
+    "4298": "AQUARIUS NARANJA 375*6 PET",
+    "4299": "AQUARIUS POM. ROSADO 375*6 PET",
+    "4570": "DUAL 2250PET 6B- 3CC3FN",
+    "4571": "DUAL 2250PET 6B- 3CC3SP",
+    "4572": "DUAL 2250PET 6B- 3CC3CCZ",
+    "4574": "DUAL 3L PET 6B- 3BENSG3BENSG",
+    "4575": "DUAL 1500PET 6B- 3CC3SP",
+    "4576": "DUAL 1500PET 6B- 3AQPE3AQPE",
+    "4577": "DUAL 1500PET 6B- 3AQPRO3AQPRO",
+    "4578": "DUAL 3L PET 6B- 3CC3FN",
+    "4579": "DUAL 3L PET 6B- 3CC3SP",
+    "4580": "DUAL 3L PET 6B- 3CC3BENSG",
+    "4581": "DUAL 2250PET 6B- 3CC3AQPRO",
+    "4745": "ADES MANZANA F 1.0LTS 8TB",
+    "4746": "ADES NARANJA F 1.0LTS 8TB",
+    "4747": "ADES FR.TROPIC. F 1.0LTS 8TB",
+    "4748": "ADES DURAZNO F 1.0LTS 8TB",
+    "4749": "ADES ANANA F 1.0LTS 8TB",
+    "4780": "ADES NATURAL F 1.0LTS 8TB",
+    "4781": "ADES ALMENDRA F 1.0LTS 8TB",
+    "4785": "ADES MANZANA F 200ML 6TB",
+    "4786": "ADES NARANJA F 200ML 6TB",
+    "4787": "ADES FRUT.TROP. F 200ML 6TB",
+    "4788": "ADES DURAZNO F 200ML 6TB",
+    "4789": "ADES ANANA F 200ML 6TB",
+    "5050": "CHOCOLATADA L3N 200TB 12B",
+    "5051": "CHOCOLATADA 3 NIÑAS 1LTB 06B",
+    "5053": "CHOCOLATADA 3 NIÑAS 500TB 06B",
+    "5055": "LECHE 3 NIÑAS 1° AÑOS 1L TB 6B",
+    "5056": "LECHE 3 NIÑAS 1° AÑOS 200TB*12",
+    "5057": "CARTUCH+DUO CHOCO L3N 200TB 4C",
+    "5100": "LECHE 3 NIÑAS DESCR. 1L TB 12B",
+    "5101": "LECHE 3 NIÑAS CLASICA 1LTB 12B",
+    "5102": "LECHE 3 NIÑAS 0% LACT 1LTB 12B",
+    "5103": "LECHE L3N CON PROTEINAS 1L 6TB",
+    "5117": "ACEITE DE OLIVA TERRANOVA 5LTS",
+    "5118": "ACEITE DE OLIVA TERRANOVA 6*1LTS",
+    "5150": "CREMA COCIN. 3 NIÑAS 200TB 12B",
+    "5151": "CREMA BATIR 3 NIÑAS 200TB 12B",
+    "5152": "TOSTADA ARROZ L3N 150G 12P",
+    "5154": "L3N & YO FRUTILLA 500GR TB 6B",
+    "5155": "L3N & YO FRUTILLA 190GR TB 12B",
+    "5156": "L3N & YO VAINILLA 500GR TB 6B",
+    "5157": "L3N & YO VAINILLA 190GR TB 12B",
+    "5158": "CREMA COCIN. 3 NIÑAS 500TB 6B",
+    "5159": "CREMA BATIR 3 NIÑAS 500TB 6B",
+    "5163": "CREMA COCIN. L3N 200TB 6B",
+    "5164": "CREMA BATIR L3N 200TB 6B",
+    "5165": "L3N&YO FRUTILLA 190TB 6B",
+    "5166": "L3N&YO VAINILLA 190TB 6B",
+    "5167": "CHOCOLATADA L3N 200TB 6B",
+    "5170": "CREMA 4Q L3N 190TB 6B",
+    "5171": "CREMA HONGOS L3N 190TB 6B",
+    "6001": "RAZA ARGENTINA BLEND DE BLANCAS 6X750",
+    "6003": "RAZA ARGENTINA BLEND DE TINTAS 6X750",
+    "6605": "RABIETA IPA AMER. 473ML*06L",
+    "6606": "RABIETA GOLDEN ALE 473ML*06L",
+    "6607": "RABIETA RED IRISH A 473ML*06L",
+    "6608": "RABIETA RED HONEY 473ML*06L",
+    "6609": "RABIETA HEL. MUNICH 473ML*06L",
+    "6610": "PAMPA IPA FL. 473ML*06L",
+    "6611": "PAMPA DORADA PAMP. 473ML*06L",
+    "6612": "PAMPA AMBER ALE 473ML*06L",
+    "6613": "PAMPA HONEY 473ML*06L",
+    "6614": "PAMPA N. CREAM STOUT 473ML*06L",
+    "6615": "GUINNESS EXTRA STOUT 473ML*06L",
+    "6616": "GUINNESS HOPHOUSE 13 473ML*06L",
+    "6668": "APEROL APERITIVO 750*06 VNR",
+    "6669": "CAMPARI APERITIVO 750*12 VNR",
+    "6672": "CYNAR H. PROOF APER 750*6 VNR",
+    "6673": "CINZANO BI AMERIC. 1L*12 VNR",
+    "6674": "CINZANO ROSSO 1L*12 VNR",
+    "6678": "JCUERVO REPOS TEQUILA 750 *12",
+    "6681": "BULLDOG GIN 700*6",
+    "6682": "SKYY VODKA 750*12 VNR",
+    "6683": "SKYY VODKA FRAMB. 750*12 VNR",
+    "6684": "SKYY VODKA ORANGE 750*12 VNR",
+    "6685": "SKYY VODKA APRICOT 750*12 VNR",
+    "6690": "ESTR.GALICIA LAGER 473ML*06L",
+    "6691": "ESTR.GALICIA LAGER 355*6 VNR",
+    "6761": "FAMIGLIA CS 750*06 VNR",
+    "6762": "FAMIGLIA MALBEC 750*06 VNR",
+    "6765": "DON VALENTIN RED 750*06 VNR",
+    "6766": "DON VALENTIN WHITE 750*06 VNR",
+    "6767": "DON VALENTIN MALBEC 750*06 VNR",
+    "6768": "DON VALENTIN CS 750*06 VNR",
+    "6769": "IL CAPRONE MALBEC 750*06 VNR",
+    "6770": "IL CAPRONE CS 750*06 VNR",
+    "6771": "NEW AGE WHITE 750*06 VNR",
+    "6772": "MARLO DULCE 750*06 VNR",
+    "6773": "FAMIGLIA XENEIZES 750*06 VNR",
+    "6774": "FAMIGLIA LA MAQUINA 750*06 VNR",
+    "6775": "ESTRELLA EXTRA BRUT 750*06 VNR",
+    "6866": "VIÑAS RIOJANAS VARIETAL TORRONTES TETRA 1LTS 12X1L",
+    "6868": "NACARI TINTO TETRA 1LTS X 12",
+    "6869": "SANTA FLORENTINA BV MAL/SYRAH 750CC",
+    "10024": "NAMPE MALBEC 1125X6",
+    "10655": "SANTA FLORENTINA TORRONTES 6*750",
+    "30000": "VIÑAS RIOJANAS TINTO TETRA 1LTS",
+    "30255": "SANTA FLORENTINA CABERNET 6*750CC",
+    "30355": "SANTA FLORENTINA MALBEC X6 750CC",
+    "33686": "VIÑAS RIOJANAS BLANCO TETRA 1LTS X 12U",
+    "35504": "CLUB DE PLAYA ROSADO DULCE 6X750",
+    "36867": "NACARI BLANCO TETRA 1LTS X 12U",
+    "36870": "SANTA FLORENTINA TORR/CHARDONAY 6*750ML",
+    "47070": "TILIMUQUI EXTRA BRUT 6*750",
+    "68422": "CONEJO VERDE ESPUMANTE BRUT ROSE CJ 6X750",
+    "71420": "VIÑAS DE BALBO CLASICO TINTO CJ 6X1125",
+    "100040": "ACEITE OLIVA TERRANOVA 12*500 CC",
+    "130222": "CHACABUCO CHENIN DULCE CJ6X750ML",
+    "565504": "CLUB DE PLAYA  BLANCO DULCE 6X750",
+    "601015": "ANTONIETA ESPUMANTE BRUT NATURE-CJ 4X 750CM",
+    "701085": "ANTONIETA ROSE PINOR NOIR - CJ 4X 750ML"
+  };
+
+  var state = { activo: DEPOSITOS[0], datos: {}, productos: {} };
+  var currentProductKey = null;
+
+  function loadJSON(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function saveJSON(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* sin almacenamiento disponible */ }
+  }
+
+  (function init() {
+    var datos = loadJSON(STORAGE_KEY, {});
+    DEPOSITOS.forEach(function (d) { if (!Array.isArray(datos[d])) datos[d] = []; });
+    state.datos = datos;
+
+    var storedProductos = loadJSON(PRODUCTS_KEY, null);
+    if (storedProductos) {
+      state.productos = storedProductos;
+    } else {
+      state.productos = Object.assign({}, SEED_PRODUCTS);
+      saveJSON(PRODUCTS_KEY, state.productos);
+    }
+  })();
+
+  function saveDatos() { saveJSON(STORAGE_KEY, state.datos); }
+  function saveProductos() { saveJSON(PRODUCTS_KEY, state.productos); }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  var tabsEl = document.getElementById('tabs');
+  var form = document.getElementById('calc-form');
+  var codigoEl = document.getElementById('codigo');
+  var inicialEl = document.getElementById('inicial');
+  var comprasEl = document.getElementById('compras');
+  var ventasEl = document.getElementById('ventas');
+  var finalRealEl = document.getElementById('finalReal');
+  var productStatusEl = document.getElementById('product-status');
+  var resultProductEl = document.getElementById('result-product');
+  var stampEl = document.getElementById('stamp');
+  var stampTextEl = document.getElementById('stamp-text');
+  var figEsperado = document.getElementById('fig-esperado');
+  var figReal = document.getElementById('fig-real');
+  var figDiff = document.getElementById('fig-diff');
+  var tableWrap = document.getElementById('table-wrap');
+  var historyDeposito = document.getElementById('history-deposito');
+  var historyCount = document.getElementById('history-count');
+  var searchInput = document.getElementById('search-input');
+  var saveBtn = document.getElementById('save-btn');
+
+  var productsModal = document.getElementById('products-modal');
+  var productList = document.getElementById('product-list');
+  var productAddForm = document.getElementById('product-add-form');
+  var newCodigoEl = document.getElementById('new-codigo');
+  var newNombreEl = document.getElementById('new-nombre');
+
+  function num(v) {
+    var n = parseFloat(v);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function fmt(n) {
+    return n.toLocaleString('es-AR', { maximumFractionDigits: 2 });
+  }
+
+  function findProductKey(code) {
+    var norm = (code || '').trim().toLowerCase();
+    if (!norm) return null;
+    var keys = Object.keys(state.productos);
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i].toLowerCase() === norm) return keys[i];
+    }
+    return null;
+  }
+
+  function addOrUpdateProduct(codigo, nombre) {
+    var codigoTrim = (codigo || '').trim();
+    var nombreTrim = (nombre || '').trim();
+    if (!codigoTrim || !nombreTrim) return null;
+    var existingKey = findProductKey(codigoTrim);
+    var key = existingKey || codigoTrim;
+    state.productos[key] = nombreTrim;
+    saveProductos();
+    return key;
+  }
+
+  function deleteProduct(key) {
+    delete state.productos[key];
+    saveProductos();
+  }
+
+  // ---- Tabs ----
+  function renderTabs() {
+    tabsEl.innerHTML = '';
+    DEPOSITOS.forEach(function (d) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'tab' + (d === state.activo ? ' active' : '');
+      b.textContent = d;
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', d === state.activo ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        state.activo = d;
+        renderTabs();
+        renderHistory();
+      });
+      tabsEl.appendChild(b);
+    });
+  }
+
+  // ---- Product lookup on the calc form ----
+  function renderProductStatus() {
+    var raw = codigoEl.value;
+    if (!raw.trim()) {
+      productStatusEl.className = 'product-status';
+      productStatusEl.innerHTML = '';
+      currentProductKey = null;
+      return;
+    }
+    var key = findProductKey(raw);
+    if (key) {
+      currentProductKey = key;
+      productStatusEl.className = 'product-status found';
+      productStatusEl.innerHTML = 'Producto: <span class="name">' + escapeHtml(state.productos[key]) + '</span>';
+      return;
+    }
+    currentProductKey = null;
+    productStatusEl.className = 'product-status unknown';
+    productStatusEl.innerHTML =
+      '<span class="flag">Código no registrado.</span>' +
+      '<div class="quick-add">' +
+      '<input type="text" id="quick-add-nombre" placeholder="Nombre del producto">' +
+      '<button type="button" class="btn btn-ghost" id="quick-add-btn">Agregar producto</button>' +
+      '</div>';
+    var quickInput = document.getElementById('quick-add-nombre');
+    var quickBtn = document.getElementById('quick-add-btn');
+    function commitQuickAdd() {
+      var key2 = addOrUpdateProduct(raw, quickInput.value);
+      if (key2) {
+        renderProductStatus();
+        updatePreview();
+      } else {
+        quickInput.focus();
+      }
+    }
+    quickBtn.addEventListener('click', commitQuickAdd);
+    quickInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); commitQuickAdd(); }
+    });
+  }
+
+  // ---- Live preview / stamp ----
+  function computeCurrent() {
+    var inicial = num(inicialEl.value);
+    var compras = num(comprasEl.value);
+    var ventas = num(ventasEl.value);
+    var finalReal = num(finalRealEl.value);
+    var esperado = inicial + compras - ventas;
+    var diferencia = finalReal - esperado;
+    return { inicial: inicial, compras: compras, ventas: ventas, finalReal: finalReal, esperado: esperado, diferencia: diferencia };
+  }
+
+  function stateFor(diferencia) {
+    if (diferencia === 0) return 'good';
+    if (diferencia > 0) return 'warn';
+    return 'bad';
+  }
+
+  function labelFor(estado) {
+    if (estado === 'good') return 'Conforme';
+    if (estado === 'warn') return 'Sobra stock';
+    return 'Falta stock';
+  }
+
+  function updatePreview() {
+    var vals = computeCurrent();
+    var anyFilled = inicialEl.value !== '' || comprasEl.value !== '' || ventasEl.value !== '' || finalRealEl.value !== '';
+
+    if (currentProductKey) {
+      resultProductEl.className = 'result-product';
+      resultProductEl.innerHTML = '<span class="code">#' + escapeHtml(currentProductKey) + '</span> — ' + escapeHtml(state.productos[currentProductKey]);
+    } else if (codigoEl.value.trim()) {
+      resultProductEl.className = 'result-product warn';
+      resultProductEl.textContent = 'Código sin registrar todavía';
+    } else {
+      resultProductEl.className = 'result-product';
+      resultProductEl.textContent = '';
+    }
+
+    figEsperado.textContent = anyFilled ? fmt(vals.esperado) : '—';
+    figReal.textContent = anyFilled ? fmt(vals.finalReal) : '—';
+
+    if (!anyFilled) {
+      figDiff.textContent = '—';
+      figDiff.className = '';
+      stampEl.className = 'stamp state-neutral';
+      stampTextEl.innerHTML = 'Cargá<br>los datos';
+      return;
+    }
+
+    var estado = stateFor(vals.diferencia);
+    var diffText = (vals.diferencia > 0 ? '+' : '') + fmt(vals.diferencia);
+    figDiff.textContent = diffText;
+    figDiff.className = vals.diferencia === 0 ? 'diff-zero' : (vals.diferencia > 0 ? 'diff-pos' : 'diff-neg');
+
+    stampEl.className = 'stamp state-' + estado;
+    stampTextEl.innerHTML = labelFor(estado);
+  }
+
+  // ---- History ----
+  function renderHistory() {
+    var registros = state.datos[state.activo] || [];
+    historyDeposito.textContent = state.activo;
+
+    var term = (searchInput.value || '').trim().toLowerCase();
+    var filtrados = term
+      ? registros.filter(function (r) {
+          return (r.codigo + ' ' + r.nombre).toLowerCase().indexOf(term) !== -1;
+        })
+      : registros;
+
+    historyCount.textContent = registros.length
+      ? (term ? (filtrados.length + ' de ' + registros.length + ' registros') : (registros.length + (registros.length === 1 ? ' registro' : ' registros')))
+      : '';
+
+    if (!registros.length) {
+      tableWrap.innerHTML = '<div class="empty-state"><strong>Todavía no hay registros</strong>Los cálculos guardados para ' + escapeHtml(state.activo) + ' van a aparecer acá.</div>';
+      return;
+    }
+
+    if (!filtrados.length) {
+      tableWrap.innerHTML = '<div class="empty-state"><strong>Sin coincidencias</strong>Ningún registro de ' + escapeHtml(state.activo) + ' coincide con "' + escapeHtml(searchInput.value) + '".</div>';
+      return;
+    }
+
+    var rows = filtrados.slice().reverse().map(function (r) {
+      var estado = r.estado;
+      var diffClass = estado === 'good' ? 'diff-zero' : (estado === 'warn' ? 'diff-pos' : 'diff-neg');
+      var diffText = (r.diferencia > 0 ? '+' : '') + fmt(r.diferencia);
+      var fecha = new Date(r.fecha);
+      var fechaStr = fecha.toLocaleDateString('es-AR') + ' · ' + fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+      return '<tr data-id="' + r.id + '">' +
+        '<td class="datetime">' + fechaStr + '</td>' +
+        '<td><span class="code-pill">' + escapeHtml(r.codigo) + '</span></td>' +
+        '<td class="producto-name">' + escapeHtml(r.nombre) + '</td>' +
+        '<td>' + fmt(r.inicial) + '</td>' +
+        '<td>' + fmt(r.compras) + '</td>' +
+        '<td>' + fmt(r.ventas) + '</td>' +
+        '<td>' + fmt(r.esperado) + '</td>' +
+        '<td>' + fmt(r.finalReal) + '</td>' +
+        '<td class="' + diffClass + '">' + diffText + '</td>' +
+        '<td><span class="status-chip state-' + estado + '"><span class="dot"></span>' + labelFor(estado) + '</span></td>' +
+        '<td class="del-cell"><button class="del-btn" data-id="' + r.id + '" title="Eliminar registro" aria-label="Eliminar registro">✕</button></td>' +
+        '</tr>';
+    }).join('');
+
+    tableWrap.innerHTML = '<table>' +
+      '<thead><tr>' +
+      '<th>Fecha</th><th>Código</th><th>Producto</th><th>Inicial</th><th>Compras</th><th>Ventas</th><th>Esperado</th><th>Contado</th><th>Diferencia</th><th>Estado</th><th></th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+      '</table>';
+
+    Array.prototype.forEach.call(tableWrap.querySelectorAll('.del-btn'), function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-id');
+        state.datos[state.activo] = (state.datos[state.activo] || []).filter(function (r) { return String(r.id) !== id; });
+        saveDatos();
+        renderHistory();
+      });
+    });
+  }
+
+  // ---- Form submit ----
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!currentProductKey) {
+      renderProductStatus();
+      var quickInput = document.getElementById('quick-add-nombre');
+      if (quickInput) quickInput.focus(); else codigoEl.focus();
+      return;
+    }
+    var vals = computeCurrent();
+    var estado = stateFor(vals.diferencia);
+    var registro = {
+      id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      fecha: new Date().toISOString(),
+      codigo: currentProductKey,
+      nombre: state.productos[currentProductKey],
+      inicial: vals.inicial,
+      compras: vals.compras,
+      ventas: vals.ventas,
+      finalReal: vals.finalReal,
+      esperado: vals.esperado,
+      diferencia: vals.diferencia,
+      estado: estado
+    };
+    if (!state.datos[state.activo]) state.datos[state.activo] = [];
+    state.datos[state.activo].push(registro);
+    saveDatos();
+    renderHistory();
+
+    form.reset();
+    renderProductStatus();
+    updatePreview();
+    codigoEl.focus();
+
+    saveBtn.textContent = 'Registrado ✓';
+    setTimeout(function () { saveBtn.textContent = 'Calcular y registrar'; }, 1400);
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', function () {
+    form.reset();
+    renderProductStatus();
+    updatePreview();
+  });
+
+  document.getElementById('clear-history').addEventListener('click', function () {
+    if (!(state.datos[state.activo] || []).length) return;
+    if (confirm('¿Borrar todo el historial de ' + state.activo + '? Esta acción no se puede deshacer.')) {
+      state.datos[state.activo] = [];
+      saveDatos();
+      renderHistory();
+    }
+  });
+
+  [codigoEl].forEach(function (el) {
+    el.addEventListener('input', function () { renderProductStatus(); updatePreview(); });
+  });
+  [inicialEl, comprasEl, ventasEl, finalRealEl].forEach(function (el) {
+    el.addEventListener('input', updatePreview);
+  });
+  searchInput.addEventListener('input', renderHistory);
+
+  // ---- Products modal ----
+  function renderProductList() {
+    var keys = Object.keys(state.productos).sort(function (a, b) { return a.localeCompare(b, 'es'); });
+    if (!keys.length) {
+      productList.innerHTML = '<div class="product-list-empty">Todavía no cargaste productos.</div>';
+      return;
+    }
+    productList.innerHTML = keys.map(function (k) {
+      return '<div class="product-list-item">' +
+        '<span class="code-pill">' + escapeHtml(k) + '</span>' +
+        '<span class="pname">' + escapeHtml(state.productos[k]) + '</span>' +
+        '<button type="button" class="del-btn" data-key="' + escapeHtml(k) + '" title="Eliminar producto" aria-label="Eliminar producto">✕</button>' +
+        '</div>';
+    }).join('');
+
+    Array.prototype.forEach.call(productList.querySelectorAll('.del-btn'), function (btn) {
+      btn.addEventListener('click', function () {
+        var key = btn.getAttribute('data-key');
+        if (confirm('¿Eliminar "' + key + ' — ' + state.productos[key] + '" del catálogo? El historial ya guardado no se modifica.')) {
+          deleteProduct(key);
+          renderProductList();
+          renderProductStatus();
+          updatePreview();
+        }
+      });
+    });
+  }
+
+  function openProductsModal() {
+    renderProductList();
+    productsModal.hidden = false;
+    newCodigoEl.value = '';
+    newNombreEl.value = '';
+    newCodigoEl.focus();
+  }
+
+  function closeProductsModal() {
+    productsModal.hidden = true;
+  }
+
+  document.getElementById('open-products').addEventListener('click', openProductsModal);
+  document.getElementById('close-products').addEventListener('click', closeProductsModal);
+  productsModal.addEventListener('click', function (e) {
+    if (e.target === productsModal) closeProductsModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !productsModal.hidden) closeProductsModal();
+  });
+
+  productAddForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var key = addOrUpdateProduct(newCodigoEl.value, newNombreEl.value);
+    if (!key) return;
+    newCodigoEl.value = '';
+    newNombreEl.value = '';
+    renderProductList();
+    renderProductStatus();
+    updatePreview();
+    newCodigoEl.focus();
+  });
+
+  // ---- Init ----
+  renderTabs();
+  renderProductStatus();
+  renderHistory();
+  updatePreview();
+})();
+</script>
