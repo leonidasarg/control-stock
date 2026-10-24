@@ -3,73 +3,92 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cotizador</title>
+<title>Cotizador · Vestí Tu Negocio</title>
+<meta name="theme-color" content="#D6006E">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 
+  /* Paleta de imprenta de Vestí Tu Negocio: magenta y cyan de proceso sobre papel algodón */
   :root {
-    --bg: #eef0ee;
-    --surface: #ffffff;
-    --surface-sunken: #e6e9e5;
-    --ink: #1e2422;
-    --ink-muted: #5b655e;
-    --ink-faint: #8b968e;
-    --border: #d3d8d1;
-    --border-strong: #b7bfb4;
-    --accent: #2c5a82;
-    --accent-strong: #1f435f;
-    --accent-wash: #e3edf4;
+    --bg: #F2EFEE;
+    --surface: #FFFFFF;
+    --surface-sunken: #E9E4E5;
+    --ink: #15131A;
+    --ink-muted: #453F4C;
+    --ink-faint: #736C7C;
+    --border: #DAD2D5;
+    --border-strong: #BDB2B7;
+    --accent: #D6006E;
+    --accent-strong: #A30054;
+    --accent-wash: #FCE4F0;
+    --on-accent: #FFFFFF;
+    --cyan: #0089C7;
+    --cyan-wash: #DFF1FA;
     --good: #2e8b57;
     --good-wash: #e3f3ea;
     --warn: #b8790f;
     --warn-wash: #faf0dc;
     --bad: #c0392b;
     --bad-wash: #fbe8e5;
-    --shadow: 0 1px 2px rgba(30, 36, 34, 0.06), 0 8px 24px -12px rgba(30, 36, 34, 0.18);
+    --shadow: 0 1px 0 rgba(21, 19, 26, 0.06), 0 12px 28px -18px rgba(21, 19, 26, 0.45);
+    --display: 'Archivo', 'Archivo Black', Helvetica, Arial, sans-serif;
+    --body: 'IBM Plex Sans', 'Segoe UI', Helvetica, Arial, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #14181a;
-      --surface: #1b2124;
-      --surface-sunken: #171c1e;
-      --ink: #e8ebe7;
-      --ink-muted: #9aa5a0;
-      --ink-faint: #6d7873;
-      --border: #2c3436;
-      --border-strong: #3b4547;
-      --accent: #79aed9;
-      --accent-strong: #9dc6e8;
-      --accent-wash: #1e2c36;
+      --bg: #141118;
+      --surface: #1C1822;
+      --surface-sunken: #262030;
+      --ink: #F3EFF4;
+      --ink-muted: #C6BECE;
+      --ink-faint: #928A9E;
+      --border: #322B3B;
+      --border-strong: #463D52;
+      --accent: #FF4D9D;
+      --accent-strong: #FF85BC;
+      --accent-wash: #3A0F27;
+      --on-accent: #1A0210;
+      --cyan: #3FBBEE;
+      --cyan-wash: #0C2B3A;
       --good: #55b47f;
       --good-wash: #17281f;
       --warn: #e0a83d;
       --warn-wash: #2c2415;
       --bad: #e07a68;
       --bad-wash: #2e1c19;
-      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 28px -12px rgba(0, 0, 0, 0.5);
+      --shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 14px 30px -18px rgba(0, 0, 0, 0.9);
     }
   }
 
   :root[data-theme="dark"] {
-    --bg: #14181a;
-    --surface: #1b2124;
-    --surface-sunken: #171c1e;
-    --ink: #e8ebe7;
-    --ink-muted: #9aa5a0;
-    --ink-faint: #6d7873;
-    --border: #2c3436;
-    --border-strong: #3b4547;
-    --accent: #79aed9;
-    --accent-strong: #9dc6e8;
-    --accent-wash: #1e2c36;
+    --bg: #141118;
+    --surface: #1C1822;
+    --surface-sunken: #262030;
+    --ink: #F3EFF4;
+    --ink-muted: #C6BECE;
+    --ink-faint: #928A9E;
+    --border: #322B3B;
+    --border-strong: #463D52;
+    --accent: #FF4D9D;
+    --accent-strong: #FF85BC;
+    --accent-wash: #3A0F27;
+    --on-accent: #1A0210;
+    --cyan: #3FBBEE;
+    --cyan-wash: #0C2B3A;
     --good: #55b47f;
     --good-wash: #17281f;
     --warn: #e0a83d;
     --warn-wash: #2c2415;
     --bad: #e07a68;
     --bad-wash: #2e1c19;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 28px -12px rgba(0, 0, 0, 0.5);
+    --shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 14px 30px -18px rgba(0, 0, 0, 0.9);
   }
 
   * { box-sizing: border-box; }
@@ -78,7 +97,7 @@
     margin: 0;
     background: var(--bg);
     color: var(--ink);
-    font-family: 'Source Sans 3', system-ui, sans-serif;
+    font-family: var(--body);
     min-height: 100vh;
   }
 
@@ -104,16 +123,8 @@
 
   .sidebar-brand { padding: 0 10px; }
 
-  .sidebar-brand .name {
-    font-family: 'Barlow Semi Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 28px;
-    letter-spacing: -0.01em;
-    line-height: 1;
-  }
-
   .brand-eyebrow {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--mono);
     font-size: 11px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -122,7 +133,7 @@
   }
 
   .menu-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--mono);
     font-size: 11px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -176,7 +187,7 @@
 
   .menu-item .count {
     margin-left: auto;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--mono);
     font-size: 11px;
     background: var(--bad);
     color: #fff;
@@ -212,7 +223,7 @@
   }
 
   h1 {
-    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-family: var(--display);
     font-weight: 700;
     font-size: clamp(26px, 4vw, 36px);
     letter-spacing: -0.01em;
@@ -308,14 +319,14 @@
   .card + .card { margin-top: 20px; }
 
   .card h2 {
-    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-family: var(--display);
     font-weight: 600;
     font-size: 20px;
     margin: 0 0 4px;
   }
 
   .card h3 {
-    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-family: var(--display);
     font-weight: 600;
     font-size: 16px;
     margin: 20px 0 10px;
@@ -388,10 +399,10 @@
 
   textarea { resize: vertical; min-height: 70px; }
 
-  input.num { font-family: 'IBM Plex Mono', monospace; text-align: right; }
+  input.num { font-family: var(--mono); text-align: right; }
 
   .btn {
-    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-family: var(--display);
     font-weight: 600;
     font-size: 15px;
     letter-spacing: 0.03em;
@@ -403,10 +414,8 @@
     white-space: nowrap;
   }
 
-  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary { background: var(--accent); color: var(--on-accent); }
   .btn-primary:hover { background: var(--accent-strong); }
-  :root[data-theme="dark"] .btn-primary { color: #0f1a22; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn-primary { color: #0f1a22; } }
 
   .btn-ghost {
     background: var(--surface);
@@ -483,7 +492,7 @@
     vertical-align: middle;
   }
 
-  td.num, th.num { text-align: right; font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
+  td.num, th.num { text-align: right; font-family: var(--mono); white-space: nowrap; }
   th.num { font-family: inherit; }
 
   tr.clickable { cursor: pointer; }
@@ -492,9 +501,9 @@
 
   .items-table input { padding: 6px 8px; font-size: 14px; }
   .items-table td { padding: 6px 8px; }
-  .items-table .qty { width: 80px; }
-  .items-table .price { width: 120px; }
-  .items-table .disc { width: 70px; }
+  .items-table .qty { width: 64px; }
+  .items-table .price { width: 100px; }
+  .items-table .disc { width: 60px; }
 
   .empty {
     text-align: center;
@@ -507,7 +516,7 @@
 
   .muted { color: var(--ink-muted); }
   .faint { color: var(--ink-faint); font-size: 13px; }
-  .mono { font-family: 'IBM Plex Mono', monospace; }
+  .mono { font-family: var(--mono); }
 
   .badge {
     display: inline-block;
@@ -540,10 +549,10 @@
     gap: 12px;
   }
 
-  .totals .row span:last-child { font-family: 'IBM Plex Mono', monospace; }
+  .totals .row span:last-child { font-family: var(--mono); }
 
   .totals .grand {
-    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-family: var(--display);
     font-size: 24px;
     font-weight: 700;
     border-top: 2px solid var(--border-strong);
@@ -551,7 +560,7 @@
     margin-top: 4px;
   }
 
-  .totals .grand span:last-child { font-family: 'Barlow Semi Condensed', sans-serif; }
+  .totals .grand span:last-child { font-family: var(--display); }
 
   .internal {
     margin-top: 18px;
@@ -562,7 +571,7 @@
   }
 
   .internal .label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--mono);
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -640,7 +649,7 @@
   }
 
   .stat .v {
-    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-family: var(--display);
     font-weight: 700;
     font-size: 26px;
     margin-top: 4px;
@@ -666,7 +675,7 @@
     background: var(--accent);
   }
 
-  .timeline .when { font-size: 12px; color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace; }
+  .timeline .when { font-size: 12px; color: var(--ink-faint); font-family: var(--mono); }
   .timeline .what { font-size: 14px; margin-top: 2px; white-space: pre-wrap; }
 
   .detail-meta {
@@ -693,7 +702,7 @@
   dialog::backdrop { background: rgba(10, 14, 12, 0.5); }
 
   dialog h2 {
-    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-family: var(--display);
     font-weight: 600;
     font-size: 22px;
     margin: 0 0 16px;
@@ -718,23 +727,81 @@
 
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* ---------- Tipografía según el manual de marca ---------- */
+  h1, .stat .v, .totals .grand, .totals .grand span:last-child {
+    font-family: var(--display);
+    font-weight: 800;
+    font-stretch: 112%;
+    letter-spacing: -0.015em;
+  }
+
+  h1 { text-transform: uppercase; line-height: 0.95; }
+
+  /* Desregistro de impresión: la firma de la marca, una sola vez por pantalla */
+  .reg { text-shadow: 0.030em 0.026em 0 var(--accent), -0.026em -0.020em 0 var(--cyan); }
+
+  .card h2, dialog h2 {
+    font-family: var(--body);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 0;
+  }
+
+  dialog h2 { font-size: 20px; }
+
+  .card h3, th, .stat .k, .menu-label, .brand-eyebrow, .internal .label {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .btn {
+    font-family: var(--body);
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .sidebar-brand .logo { display: block; width: 190px; max-width: 100%; height: auto; }
+  .sidebar-brand .logo-dark { display: none; }
+  :root[data-theme="dark"] .sidebar-brand .logo-light { display: none; }
+  :root[data-theme="dark"] .sidebar-brand .logo-dark { display: block; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .sidebar-brand .logo-light { display: none; }
+    :root:not([data-theme="light"]) .sidebar-brand .logo-dark { display: block; }
+  }
+  .sidebar-brand .brand-eyebrow { margin: 10px 0 0; }
+
+  .badge.missing { background: var(--warn-wash); color: var(--warn); }
+  .line-detail { margin-top: 4px; font-size: 13px !important; }
+  .faint.detail { color: var(--ink-muted); }
+
   /* ---------- Impresión de la cotización ---------- */
   #print-area { display: none; }
 
   @media print {
     @page { margin: 16mm; }
-    body { background: #fff; color: #000; }
+    body { background: #fff; color: #15131A; font-family: var(--body); }
     .app, .scrim, .toast, dialog { display: none !important; }
     #print-area { display: block; font-size: 12pt; color: #000; }
     #print-area table { font-size: 11pt; }
-    #print-area th { background: #eee; color: #000; }
-    #print-area td, #print-area th { border-top: 1px solid #ccc; }
-    .p-head { display: flex; justify-content: space-between; gap: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 16px; }
-    .p-head h1 { font-size: 26pt; }
+    #print-area th { background: #F2EFEE; color: #453F4C; }
+    #print-area td, #print-area th { border-top: 1px solid #DAD2D5; }
+    #print-area * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .p-head { display: flex; justify-content: space-between; gap: 20px; border-bottom: 2px solid #D6006E; padding-bottom: 12px; margin-bottom: 16px; }
+    .p-head h1 { font-size: 24pt; }
+    .p-logo { height: 46px; width: auto; display: block; margin-bottom: 8px; }
+    .p-co { font-family: var(--mono); font-size: 9pt; color: #453F4C; line-height: 1.5; }
+    .p-title { font-family: var(--display); font-weight: 800; font-stretch: 112%; text-transform: uppercase; font-size: 20pt; letter-spacing: -0.015em; }
+    .p-detail { font-size: 9.5pt; color: #736C7C; }
+    .p-label { font-family: var(--mono); font-size: 8.5pt; letter-spacing: 0.14em; text-transform: uppercase; color: #736C7C; margin-bottom: 4px; }
     .p-box { margin-bottom: 14px; line-height: 1.5; }
     .p-totals { margin-left: auto; width: 280px; margin-top: 14px; }
     .p-totals .row { display: flex; justify-content: space-between; padding: 3px 0; }
-    .p-totals .grand { font-weight: 700; font-size: 15pt; border-top: 2px solid #000; padding-top: 6px; margin-top: 4px; }
+    .p-totals .grand { font-size: 16pt; border-top: 2px solid #15131A; padding-top: 6px; margin-top: 4px; }
+    .p-totals .grand span:last-child { color: #D6006E; }
     .p-notes { margin-top: 20px; white-space: pre-wrap; }
   }
 </style>
@@ -743,8 +810,9 @@
 <div class="app">
   <aside class="sidebar" id="sidebar" aria-label="Menú">
     <div class="sidebar-brand">
-      <p class="brand-eyebrow">Ventas</p>
-      <div class="name">Cotizador</div>
+      <img class="logo logo-light" src="brand/logo-horizontal.svg" alt="Vestí Tu Negocio">
+      <img class="logo logo-dark" src="brand/logo-horizontal-oscuro.svg" alt="Vestí Tu Negocio">
+      <p class="brand-eyebrow">Cotizador</p>
     </div>
 
     <div>
@@ -775,7 +843,7 @@
 <div class="page">
   <header class="top">
     <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-    <h1 id="view-title">Nueva cotización</h1>
+    <h1 id="view-title" class="reg">Nueva cotización</h1>
   </header>
 
   <!-- ================= NUEVA COTIZACIÓN ================= -->
@@ -870,6 +938,11 @@
           </div>
         </div>
 
+        <div class="field" style="margin-bottom:16px">
+          <label for="q-sena">Seña %</label>
+          <input type="number" id="q-sena" min="0" max="100" step="1" class="num">
+        </div>
+
         <div class="totals" id="q-totals"></div>
 
         <div class="internal">
@@ -943,7 +1016,7 @@
         <button type="button" class="btn btn-primary" id="c-add">+ Nuevo cliente</button>
       </div>
       <div class="toolbar">
-        <input type="search" id="c-search" placeholder="Buscar por nombre, CUIT, localidad, teléfono…">
+        <input type="search" id="c-search" placeholder="Buscar por nombre, CUIT, rubro, localidad, teléfono…">
       </div>
       <div class="table-wrap">
         <table>
@@ -952,7 +1025,7 @@
               <th>Nombre / Razón social</th>
               <th>CUIT / DNI</th>
               <th>Teléfono</th>
-              <th>Email</th>
+              <th>Rubro</th>
               <th>Localidad</th>
               <th class="num">Cotiz.</th>
             </tr>
@@ -1011,6 +1084,10 @@
         <input id="cf-name" required>
       </div>
       <div class="field">
+        <label for="cf-rubro">Rubro</label>
+        <select id="cf-rubro"><option value="">—</option></select>
+      </div>
+      <div class="field">
         <label for="cf-contact">Persona de contacto</label>
         <input id="cf-contact">
       </div>
@@ -1046,7 +1123,7 @@
       </div>
       <div class="field">
         <label for="cf-province">Provincia</label>
-        <input id="cf-province" placeholder="La Rioja">
+        <input id="cf-province" placeholder="Córdoba">
       </div>
       <div class="field span-2">
         <label for="cf-notes">Notas</label>
@@ -1083,7 +1160,7 @@
       </div>
       <div class="field">
         <label for="pf-markup">Margen sobre costo (%)</label>
-        <input id="pf-markup" type="number" step="0.1" class="num">
+        <input id="pf-markup" type="number" step="any" class="num">
       </div>
       <div class="field span-2">
         <label for="pf-price">Precio de venta ($) *</label>
@@ -1127,13 +1204,17 @@
 <dialog id="dlg-company">
   <form method="dialog" id="company-form">
     <h2>Datos de mi empresa</h2>
-    <p class="muted" style="margin-top:0">Aparecen en el encabezado de la cotización impresa.</p>
+    <p class="muted" style="margin-top:0">Salen en el encabezado de la cotización impresa y en el mensaje de WhatsApp.</p>
     <div class="grid">
       <div class="field span-2"><label for="co-name">Nombre</label><input id="co-name"></div>
       <div class="field"><label for="co-tax">CUIT</label><input id="co-tax"></div>
       <div class="field"><label for="co-phone">Teléfono</label><input id="co-phone"></div>
       <div class="field span-2"><label for="co-email">Email</label><input id="co-email"></div>
       <div class="field span-2"><label for="co-address">Dirección</label><input id="co-address"></div>
+      <div class="field"><label for="co-instagram">Instagram</label><input id="co-instagram" placeholder="@vestitunegocio"></div>
+      <div class="field"><label for="co-web">Web</label><input id="co-web" placeholder="vestitunegocio.com.ar"></div>
+      <div class="field"><label for="co-sena">Seña (%)</label><input id="co-sena" type="number" min="0" max="100" step="1" class="num"></div>
+      <div class="field span-2"><label for="co-terms">Condiciones que se cargan en cada cotización nueva</label><textarea id="co-terms" rows="6"></textarea></div>
     </div>
     <div class="actions">
       <button type="submit" class="btn btn-primary">Guardar</button>
@@ -1169,11 +1250,44 @@
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { toast('No se pudo guardar en el navegador'); }
   }
 
+  // Datos de Vestí Tu Negocio (del manual de marca y el sitio). Se cambian desde "Datos de mi empresa".
+  var DEFAULT_COMPANY = {
+    name: 'Vestí Tu Negocio',
+    taxId: '',
+    phone: '',
+    email: '',
+    address: 'Córdoba Capital, Argentina',
+    instagram: '@vestitunegocio',
+    web: '',
+    senaPct: 50,
+    terms: [
+      'Entrega: entre 5 y 7 días hábiles desde que aprobás el diseño y dejás la seña. Urgencias en 48 a 72 h, con recargo.',
+      'Pago: efectivo, transferencia o Mercado Pago.',
+      'Logo: mandalo en vector (AI, SVG, PDF) o PNG sin fondo. Si solo lo tenés en baja calidad, lo redibujamos sin cargo.',
+      'Cuidado: lavar del revés, con agua fría o tibia y sin lavandina. No planchar sobre la estampa.'
+    ].join('\n')
+  };
+
+  // Catálogo base del sitio. Los precios quedan en cero para que cargues los tuyos.
+  var BASE_CATALOG = [
+    { code: 'REM-180', name: 'Remera algodón peinado 180 g/m² con estampa DTF', unit: 'un' },
+    { code: 'BUZ-380', name: 'Buzo cuello redondo de frisa 380 g/m² con estampa DTF', unit: 'un' },
+    { code: 'BUZ-380C', name: 'Buzo canguro con capucha, frisa 380 g/m², con estampa DTF', unit: 'un' },
+    { code: 'GOR-GAB', name: 'Gorra de gabardina clásica personalizada', unit: 'un' },
+    { code: 'GOR-TRK', name: 'Gorra trucker personalizada', unit: 'un' },
+    { code: 'DTF-ADI', name: 'Estampa DTF adicional (espalda o manga)', unit: 'un' },
+    { code: 'DTF-CLI', name: 'Estampado DTF sobre prenda del cliente', unit: 'un' },
+    { code: 'URG', name: 'Recargo por urgencia (48 a 72 h)', unit: 'pedido' },
+    { code: 'ENV', name: 'Envío al interior', unit: 'envío' }
+  ];
+
+  var RUBROS = ['Gastronomía', 'Gimnasio o estudio', 'Peluquería o barbería', 'Taller o ferretería', 'Comercio o kiosco', 'Salud y estética', 'Servicios profesionales', 'Escuela, club o evento', 'Otro'];
+
   var state = {
     clients: load(KEYS.clients, []),
     products: load(KEYS.products, []),
     quotes: load(KEYS.quotes, []),
-    company: load(KEYS.company, {}),
+    company: Object.assign({}, DEFAULT_COMPANY, load(KEYS.company, {})),
     seq: load(KEYS.seq, 0)
   };
 
@@ -1190,9 +1304,13 @@
   };
   var OPEN = ['borrador', 'enviada', 'negociacion'];
 
-  var money = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 });
-  function fmt(n) { return money.format(n || 0); }
-  function pct(n) { return (isFinite(n) ? n : 0).toLocaleString('es-AR', { maximumFractionDigits: 1 }) + '%'; }
+  // Formato del manual de marca: signo adelante y punto de miles ($12.500); decimales solo si hay.
+  function fmt(n) {
+    n = round2(n || 0);
+    var abs = Math.abs(n).toLocaleString('es-AR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+    return (n < 0 ? '−$' : '$') + abs;
+  }
+  function pct(n) { return (isFinite(n) ? n : 0).toLocaleString('es-AR', { maximumFractionDigits: 1 }) + ' %'; }
   function num(v) { var n = parseFloat(v); return isFinite(n) ? n : 0; }
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
   function round2(n) { return Math.round(n * 100) / 100; }
@@ -1338,6 +1456,7 @@
     $('cf-address').value = c.address || '';
     $('cf-city').value = c.city || '';
     $('cf-province').value = c.province || '';
+    $('cf-rubro').value = c.rubro || '';
     $('cf-notes').value = c.notes || '';
     $('cf-delete').hidden = !id;
     $('dlg-client').showModal();
@@ -1356,6 +1475,7 @@
       address: $('cf-address').value.trim(),
       city: $('cf-city').value.trim(),
       province: $('cf-province').value.trim(),
+      rubro: $('cf-rubro').value,
       notes: $('cf-notes').value.trim()
     };
     if (!data.name) return;
@@ -1389,8 +1509,10 @@
   $('c-add').addEventListener('click', function () { openClientForm(); });
   $('c-search').addEventListener('input', renderClients);
 
+  $('cf-rubro').insertAdjacentHTML('beforeend', RUBROS.map(function (r) { return '<option>' + esc(r) + '</option>'; }).join(''));
+
   function clientMatches(c, q) {
-    return norm([c.name, c.contact, c.taxId, c.phone, c.email, c.city, c.province].join(' ')).indexOf(q) !== -1;
+    return norm([c.name, c.contact, c.taxId, c.phone, c.email, c.city, c.province, c.rubro].join(' ')).indexOf(q) !== -1;
   }
 
   function renderClients() {
@@ -1404,7 +1526,7 @@
         '<td><b>' + esc(c.name) + '</b>' + (c.contact ? '<div class="faint">' + esc(c.contact) + '</div>' : '') + '</td>' +
         '<td class="mono">' + esc(c.taxId || '—') + '</td>' +
         '<td>' + esc(c.phone || '—') + '</td>' +
-        '<td>' + esc(c.email || '—') + '</td>' +
+        '<td>' + esc(c.rubro || '—') + '</td>' +
         '<td>' + esc([c.city, c.province].filter(Boolean).join(', ') || '—') + '</td>' +
         '<td class="num">' + (counts[c.id] || 0) + '</td></tr>';
     }).join('') : '<tr><td colspan="6" class="empty">' + (state.clients.length ? 'Sin resultados.' : 'Todavía no cargaste clientes.') + '</td></tr>';
@@ -1506,10 +1628,26 @@
         '<td>' + esc(p.name) + '</td>' +
         '<td>' + esc(p.unit) + '</td>' +
         '<td class="num">' + fmt(p.cost) + '</td>' +
-        '<td class="num"><b>' + fmt(p.price) + '</b></td>' +
+        '<td class="num">' + (p.price > 0 ? '<b>' + fmt(p.price) + '</b>' : '<span class="badge missing">Falta precio</span>') + '</td>' +
         '<td class="num ' + (m < 0 ? 'bad' : '') + '">' + (p.cost > 0 ? pct(m) : '—') + '</td></tr>';
-    }).join('') : '<tr><td colspan="6" class="empty">' + (state.products.length ? 'Sin resultados.' : 'Todavía no cargaste productos.') + '</td></tr>';
+    }).join('') : '<tr><td colspan="6" class="empty">' + (state.products.length ? 'Sin resultados.' :
+      'Todavía no cargaste productos.<br><br><button type="button" class="btn btn-primary btn-sm" data-seed>Cargar el catálogo de Vestí Tu Negocio</button>' +
+      '<div class="faint" style="margin-top:8px">Remeras, buzos, gorras y estampas DTF. Después completás costo y precio de cada uno.</div>') + '</td></tr>';
   }
+
+  function seedCatalog() {
+    BASE_CATALOG.forEach(function (b) {
+      state.products.push({ id: uid(), code: b.code, name: b.name, unit: b.unit, cost: 0, price: 0 });
+    });
+    persist('products');
+    renderProducts();
+    renderDraftItems();
+    toast('Catálogo cargado: completá los precios');
+  }
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-seed]')) seedCatalog();
+  });
 
   $('p-list').addEventListener('click', function (e) {
     var tr = e.target.closest('tr[data-id]');
@@ -1592,7 +1730,8 @@
       items: [],
       gdisc: 0,
       iva: 0,
-      notes: ''
+      senaPct: state.company.senaPct,
+      notes: state.company.terms || ''
     };
   }
 
@@ -1602,6 +1741,7 @@
     $('q-follow').value = draft.followUp || '';
     $('q-gdisc').value = draft.gdisc;
     $('q-iva').value = String(draft.iva);
+    $('q-sena').value = draft.senaPct;
     $('q-notes').value = draft.notes;
     $('q-client-search').value = '';
     var editing = draft.editingId && state.quotes.find(function (q) { return q.id === draft.editingId; });
@@ -1657,6 +1797,7 @@
     }
     $('q-prod-search').value = '';
     renderDraftItems();
+    if (!(p.price > 0)) toast('"' + p.name + '" no tiene precio: cargalo en la línea');
     var focusIndex = draft.items.indexOf(existing || draft.items[draft.items.length - 1]);
     var qtyInput = document.querySelector('#q-items tr[data-i="' + focusIndex + '"] .qty');
     if (qtyInput) { qtyInput.focus(); qtyInput.select(); }
@@ -1686,13 +1827,14 @@
     var tbody = $('q-items');
     if (!draft.items.length) {
       tbody.innerHTML = '<tr><td colspan="6" class="empty">' +
-        (state.products.length ? 'Buscá un producto arriba para agregarlo.' : 'Primero cargá tus productos en la pestaña <b>Productos</b>, o agregá un ítem libre.') +
+        (state.products.length ? 'Buscá un producto arriba para agregarlo.' : 'Todavía no tenés productos. <a href="#" data-seed>Cargá el catálogo de Vestí Tu Negocio</a> o agregá un ítem libre.') +
         '</td></tr>';
     } else {
       tbody.innerHTML = draft.items.map(function (it, i) {
         var nameCell = it.free
           ? '<input class="free-name" data-f="name" value="' + esc(it.name) + '" placeholder="Descripción"><div style="display:flex; gap:6px; margin-top:4px"><input data-f="cost" type="number" step="0.01" min="0" class="num" value="' + esc(it.cost || '') + '" placeholder="Costo unit." title="Costo unitario (interno)"></div>'
           : '<div>' + esc(it.name) + '</div><div class="faint">' + esc(it.code || '') + (it.unit ? ' · ' + esc(it.unit) : '') + ' · costo ' + fmt(it.cost) + '</div>';
+        nameCell += '<input class="line-detail" data-f="detail" value="' + esc(it.detail || '') + '" placeholder="Talles, color, ubicación de la estampa">';
         return '<tr data-i="' + i + '">' +
           '<td style="min-width:200px">' + nameCell + '</td>' +
           '<td class="num"><input data-f="qty" type="number" step="any" min="0" class="num qty" value="' + esc(it.qty) + '"></td>' +
@@ -1728,12 +1870,16 @@
       renderDraftTotals();
     });
   });
+  $('q-sena').addEventListener('input', function () {
+    draft.senaPct = Math.min(100, Math.max(0, num($('q-sena').value)));
+    renderDraftTotals();
+  });
   $('q-date').addEventListener('input', function () { draft.date = $('q-date').value; });
   $('q-valid').addEventListener('input', function () { draft.validDays = num($('q-valid').value); });
   $('q-follow').addEventListener('input', function () { draft.followUp = $('q-follow').value; });
   $('q-notes').addEventListener('input', function () { draft.notes = $('q-notes').value; });
 
-  function totalsHTML(t, iva, gdisc) {
+  function totalsHTML(t, iva, gdisc, senaPct) {
     var rows = '<div class="row"><span>Subtotal</span><span>' + fmt(t.gross) + '</span></div>';
     if (num(gdisc) > 0) rows += '<div class="row"><span>Descuento ' + pct(num(gdisc)) + '</span><span>− ' + fmt(t.discount) + '</span></div>';
     if (num(iva) > 0) {
@@ -1741,6 +1887,10 @@
       rows += '<div class="row"><span>IVA ' + pct(num(iva)) + '</span><span>' + fmt(t.tax) + '</span></div>';
     }
     rows += '<div class="row grand"><span>Total</span><span>' + fmt(t.total) + '</span></div>';
+    if (num(senaPct) > 0 && t.total > 0) {
+      rows += '<div class="row"><span>Seña ' + pct(num(senaPct)) + '</span><span>' + fmt(t.total * num(senaPct) / 100) + '</span></div>';
+      rows += '<div class="row"><span>Saldo al retirar</span><span>' + fmt(t.total * (1 - num(senaPct) / 100)) + '</span></div>';
+    }
     return rows;
   }
 
@@ -1752,7 +1902,7 @@
 
   function renderDraftTotals() {
     var t = computeTotals(draft.items, draft.gdisc, draft.iva);
-    $('q-totals').innerHTML = totalsHTML(t, draft.iva, draft.gdisc);
+    $('q-totals').innerHTML = totalsHTML(t, draft.iva, draft.gdisc, draft.senaPct);
     $('q-internal').innerHTML = internalHTML(t);
   }
 
@@ -1767,11 +1917,14 @@
     if (!client) { toast('Elegí un cliente'); $('q-client-search').focus(); return; }
     var items = draft.items.filter(function (it) { return num(it.qty) > 0 && (it.name || '').trim(); });
     if (!items.length) { toast('Agregá al menos un producto'); $('q-prod-search').focus(); return; }
+    var noPrice = items.filter(function (it) { return !(num(it.price) > 0); });
+    if (noPrice.length && !confirm('Hay ' + noPrice.length + ' línea(s) sin precio (' + noPrice.map(function (it) { return it.name; }).join(', ') + '). ¿Guardar igual?')) return;
 
     var clean = items.map(function (it) {
       return {
         productId: it.productId, code: it.code || '', name: it.name.trim(), unit: it.unit || '',
-        qty: num(it.qty), price: round2(num(it.price)), cost: round2(num(it.cost)), disc: num(it.disc), free: !!it.free
+        qty: num(it.qty), price: round2(num(it.price)), cost: round2(num(it.cost)), disc: num(it.disc), free: !!it.free,
+        detail: (it.detail || '').trim()
       };
     });
     var totals = computeTotals(clean, draft.gdisc, draft.iva);
@@ -1787,6 +1940,7 @@
       gdisc: num(draft.gdisc),
       iva: num(draft.iva),
       notes: draft.notes.trim(),
+      senaPct: num(draft.senaPct),
       total: totals.total
     };
 
@@ -1917,13 +2071,14 @@
 
       '<div class="table-wrap"><table><thead><tr><th>Producto</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Subtotal</th></tr></thead><tbody>' +
         q.items.map(function (it) {
-          return '<tr><td>' + esc(it.name) + (it.disc ? ' <span class="faint">(−' + pct(it.disc) + ')</span>' : '') + '</td>' +
+          return '<tr><td>' + esc(it.name) + (it.disc ? ' <span class="faint">(−' + pct(it.disc) + ')</span>' : '') +
+            (it.detail ? '<div class="faint detail">' + esc(it.detail) + '</div>' : '') + '</td>' +
             '<td class="num">' + it.qty.toLocaleString('es-AR') + '</td><td class="num">' + fmt(it.price) + '</td><td class="num">' + fmt(lineTotal(it)) + '</td></tr>';
         }).join('') +
       '</tbody></table></div>' +
 
       '<div class="layout" style="grid-template-columns:1fr 1fr; margin-top:16px">' +
-        '<div class="totals">' + totalsHTML(t, q.iva, q.gdisc) + '</div>' +
+        '<div class="totals">' + totalsHTML(t, q.iva, q.gdisc, q.senaPct) + '</div>' +
         '<div class="internal" style="margin-top:0"><div class="label">Solo para vos</div><div class="totals">' + internalHTML(t) + '</div></div>' +
       '</div>' +
 
@@ -2010,6 +2165,7 @@
       }),
       gdisc: q.gdisc,
       iva: q.iva,
+      senaPct: q.senaPct != null ? q.senaPct : state.company.senaPct,
       notes: q.notes
     };
     showView('nueva');
@@ -2019,17 +2175,23 @@
 
   function quoteText(q) {
     var c = quoteClient(q);
-    var lines = ['*Cotización ' + quoteNumber(q.number) + '*' + (state.company.name ? ' – ' + state.company.name : ''), 'Cliente: ' + c.name, ''];
+    var co = state.company;
+    var who = (c.contact || c.name).split(' ')[0];
+    var lines = ['Hola ' + who + '! Te paso la cotización *' + quoteNumber(q.number) + '*' + (co.name ? ' de ' + co.name : '') + '.', ''];
     q.items.forEach(function (it) {
-      lines.push('• ' + it.qty.toLocaleString('es-AR') + ' ' + (it.unit || '') + ' ' + it.name + ': ' + fmt(lineTotal(it)));
+      lines.push('• ' + it.qty.toLocaleString('es-AR') + ' ' + (it.unit || '') + ' – ' + it.name + ': ' + fmt(lineTotal(it)));
+      if (it.detail) lines.push('   ' + it.detail);
     });
     var t = computeTotals(q.items, q.gdisc, q.iva);
     lines.push('');
     if (q.gdisc) lines.push('Descuento ' + pct(q.gdisc) + ': −' + fmt(t.discount));
     if (q.iva) lines.push('IVA ' + pct(q.iva) + ': ' + fmt(t.tax));
     lines.push('*Total: ' + fmt(t.total) + '*');
-    lines.push('Válida hasta el ' + fmtDate(q.validUntil));
+    if (q.senaPct > 0) lines.push('Seña para arrancar (' + pct(q.senaPct) + '): ' + fmt(t.total * q.senaPct / 100));
+    lines.push('Precios válidos hasta el ' + fmtDate(q.validUntil) + '.');
     if (q.notes) { lines.push(''); lines.push(q.notes); }
+    var sign = [co.instagram, co.web].filter(Boolean).join(' · ');
+    if (sign) { lines.push(''); lines.push(sign); }
     return lines.join('\n');
   }
 
@@ -2060,9 +2222,10 @@
     var t = computeTotals(q.items, q.gdisc, q.iva);
     var hasDisc = q.items.some(function (it) { return it.disc; });
     $('print-area').innerHTML =
-      '<div class="p-head"><div><h1>' + esc(co.name || 'Cotización') + '</h1>' +
-        [co.taxId && 'CUIT ' + co.taxId, co.address, co.phone, co.email].filter(Boolean).map(function (l) { return '<div>' + esc(l) + '</div>'; }).join('') +
-      '</div><div style="text-align:right"><div style="font-size:16pt; font-weight:700">COTIZACIÓN</div><div class="mono">' + quoteNumber(q.number) + '</div>' +
+      '<div class="p-head"><div>' +
+        (norm(co.name) === norm(DEFAULT_COMPANY.name) ? '<img class="p-logo" src="brand/logo-horizontal.svg" alt="' + esc(co.name) + '">' : '<h1>' + esc(co.name || 'Cotización') + '</h1>') +
+        '<div class="p-co">' + [co.taxId && 'CUIT ' + co.taxId, co.address, co.phone && 'WhatsApp ' + co.phone, co.email, [co.instagram, co.web].filter(Boolean).join(' · ')].filter(Boolean).map(function (l) { return '<div>' + esc(l) + '</div>'; }).join('') + '</div>' +
+      '</div><div style="text-align:right"><div class="p-title">Cotización</div><div class="mono">' + quoteNumber(q.number) + '</div>' +
         '<div>Fecha: ' + fmtDate(q.date) + '</div><div>Válida hasta: ' + fmtDate(q.validUntil) + '</div></div></div>' +
       '<div class="p-box"><b>Cliente:</b> ' + esc(c.name) +
         [c.contact && 'Atención: ' + c.contact, [c.taxId, c.ivaCondition].filter(Boolean).join(' · '), [c.address, c.city, c.province].filter(Boolean).join(', '), [c.phone, c.email].filter(Boolean).join(' · ')]
@@ -2070,12 +2233,12 @@
       '</div>' +
       '<table><thead><tr><th>Código</th><th>Descripción</th><th class="num">Cant.</th><th class="num">Precio unit.</th>' + (hasDisc ? '<th class="num">Desc.</th>' : '') + '<th class="num">Importe</th></tr></thead><tbody>' +
         q.items.map(function (it) {
-          return '<tr><td>' + esc(it.code || '') + '</td><td>' + esc(it.name) + '</td><td class="num">' + it.qty.toLocaleString('es-AR') + ' ' + esc(it.unit || '') + '</td>' +
+          return '<tr><td>' + esc(it.code || '') + '</td><td>' + esc(it.name) + (it.detail ? '<div class="p-detail">' + esc(it.detail) + '</div>' : '') + '</td><td class="num">' + it.qty.toLocaleString('es-AR') + ' ' + esc(it.unit || '') + '</td>' +
             '<td class="num">' + fmt(it.price) + '</td>' + (hasDisc ? '<td class="num">' + (it.disc ? pct(it.disc) : '') + '</td>' : '') + '<td class="num">' + fmt(lineTotal(it)) + '</td></tr>';
         }).join('') +
       '</tbody></table>' +
-      '<div class="p-totals">' + totalsHTML(t, q.iva, q.gdisc) + '</div>' +
-      (q.notes ? '<div class="p-notes"><b>Observaciones:</b><br>' + esc(q.notes) + '</div>' : '');
+      '<div class="p-totals totals">' + totalsHTML(t, q.iva, q.gdisc, q.senaPct) + '</div>' +
+      (q.notes ? '<div class="p-notes"><div class="p-label">Condiciones</div>' + esc(q.notes) + '</div>' : '');
     window.print();
   }
 
@@ -2088,6 +2251,10 @@
     $('co-phone').value = co.phone || '';
     $('co-email').value = co.email || '';
     $('co-address').value = co.address || '';
+    $('co-instagram').value = co.instagram || '';
+    $('co-web').value = co.web || '';
+    $('co-sena').value = co.senaPct;
+    $('co-terms').value = co.terms || '';
     $('dlg-company').showModal();
   });
 
@@ -2098,7 +2265,11 @@
       taxId: $('co-tax').value.trim(),
       phone: $('co-phone').value.trim(),
       email: $('co-email').value.trim(),
-      address: $('co-address').value.trim()
+      address: $('co-address').value.trim(),
+      instagram: $('co-instagram').value.trim(),
+      web: $('co-web').value.trim(),
+      senaPct: Math.min(100, Math.max(0, num($('co-sena').value))),
+      terms: $('co-terms').value.trim()
     };
     persist('company');
     $('dlg-company').close();
@@ -2128,7 +2299,7 @@
         state.clients = data.clients || [];
         state.products = data.products || [];
         state.quotes = data.quotes || [];
-        state.company = data.company || {};
+        state.company = Object.assign({}, DEFAULT_COMPANY, data.company);
         state.seq = data.seq || state.quotes.reduce(function (m, q) { return Math.max(m, q.number); }, 0);
         Object.keys(KEYS).forEach(persist);
         newDraft();
