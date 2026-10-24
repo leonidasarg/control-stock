@@ -782,27 +782,74 @@
   #print-area { display: none; }
 
   @media print {
-    @page { margin: 16mm; }
-    body { background: #fff; color: #15131A; font-family: var(--body); }
+    /* Márgenes propios: no dependen de la configuración de impresión del navegador.
+       Arriba y abajo se repiten en cada hoja con el thead/tfoot de .p-page. */
+    @page { size: A4; margin: 0; }
+    html, body { background: #fff !important; }
     .app, .scrim, .toast, dialog { display: none !important; }
-    #print-area { display: block; font-size: 12pt; color: #000; }
-    #print-area table { font-size: 11pt; }
-    #print-area th { background: #F2EFEE; color: #453F4C; }
-    #print-area td, #print-area th { border-top: 1px solid #DAD2D5; }
+    #print-area {
+      display: block;
+      padding: 0 18mm;
+      color: #15131A;
+      font-family: var(--body);
+      font-size: 10pt;
+      line-height: 1.45;
+      font-variant-numeric: tabular-nums;
+    }
     #print-area * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .p-head { display: flex; justify-content: space-between; gap: 20px; border-bottom: 2px solid #D6006E; padding-bottom: 12px; margin-bottom: 16px; }
-    .p-head h1 { font-size: 24pt; }
-    .p-logo { height: 46px; width: auto; display: block; margin-bottom: 8px; }
-    .p-co { font-family: var(--mono); font-size: 9pt; color: #453F4C; line-height: 1.5; }
-    .p-title { font-family: var(--display); font-weight: 800; font-stretch: 112%; text-transform: uppercase; font-size: 20pt; letter-spacing: -0.015em; }
-    .p-detail { font-size: 9.5pt; color: #736C7C; }
-    .p-label { font-family: var(--mono); font-size: 8.5pt; letter-spacing: 0.14em; text-transform: uppercase; color: #736C7C; margin-bottom: 4px; }
-    .p-box { margin-bottom: 14px; line-height: 1.5; }
-    .p-totals { margin-left: auto; width: 280px; margin-top: 14px; }
-    .p-totals .row { display: flex; justify-content: space-between; padding: 3px 0; }
-    .p-totals .grand { font-size: 16pt; border-top: 2px solid #15131A; padding-top: 6px; margin-top: 4px; }
-    .p-totals .grand span:last-child { color: #D6006E; }
-    .p-notes { margin-top: 20px; white-space: pre-wrap; }
+    .p-page { width: 100%; border-collapse: collapse; }
+    .p-page td, .p-items td, .p-items th { border-top: 0; }
+    .p-page > thead td { height: 16mm; padding: 0; }
+    .p-page > tfoot td { height: 14mm; padding: 0; }
+    .p-page > tbody > tr > td { padding: 0; }
+
+    .p-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12mm; }
+    .p-logo { height: 13mm; width: auto; display: block; }
+    .p-co-name { font-family: var(--display); font-weight: 800; font-stretch: 112%; font-size: 18pt; text-transform: uppercase; letter-spacing: -0.015em; }
+    .p-doc { text-align: right; }
+    .p-kicker { font-family: var(--mono); font-size: 7.5pt; letter-spacing: 0.16em; text-transform: uppercase; color: #736C7C; }
+    .p-number { font-family: var(--display); font-weight: 800; font-stretch: 112%; font-size: 22pt; letter-spacing: -0.015em; line-height: 1.05; margin-top: 1mm; }
+    .p-rule { height: 0.6mm; margin: 7mm 0 8mm; background: linear-gradient(90deg, #D6006E 0 70%, #0089C7 70% 100%); border-radius: 1mm; }
+
+    .p-meta { display: grid; grid-template-columns: 1.3fr 1fr 0.7fr 0.7fr; gap: 6mm; margin-bottom: 9mm; }
+    .p-meta .p-kicker { margin-bottom: 1.5mm; }
+    .p-meta .v { font-size: 9.5pt; color: #453F4C; }
+    .p-meta .v b { color: #15131A; font-weight: 600; font-size: 10.5pt; display: block; margin-bottom: 0.5mm; }
+
+    .p-items { width: 100%; border-collapse: collapse; }
+    .p-items th {
+      font-family: var(--mono); font-weight: 500; font-size: 7.5pt; letter-spacing: 0.14em; text-transform: uppercase;
+      color: #736C7C; text-align: left; padding: 0 0 2.5mm; border-bottom: 0.4mm solid #15131A; background: none;
+    }
+    .p-items td { padding: 3.2mm 0; border-bottom: 0.25mm solid #E6E0E2; vertical-align: top; }
+    .p-items th + th, .p-items td + td { padding-left: 4mm; }
+    .p-items .r { text-align: right; white-space: nowrap; }
+    .p-items tr { break-inside: avoid; }
+    .p-item-name { font-weight: 500; }
+    .p-item-code { font-family: var(--mono); font-size: 7.5pt; color: #928A9E; letter-spacing: 0.04em; }
+    .p-detail { font-size: 8.5pt; color: #736C7C; margin-top: 0.5mm; }
+    .p-items td.amount { font-weight: 600; }
+
+    .p-bottom { display: grid; grid-template-columns: 1fr 70mm; gap: 12mm; margin-top: 7mm; align-items: start; break-inside: avoid; }
+    .p-tot .row { display: flex; justify-content: space-between; padding: 1.3mm 0; color: #453F4C; }
+    .p-tot .grand {
+      margin: 2.5mm 0; padding: 3.5mm 4mm; border-radius: 2.5mm; background: #FCE4F0; color: #15131A;
+      align-items: baseline;
+    }
+    .p-tot .grand span:first-child { font-family: var(--mono); font-size: 8pt; letter-spacing: 0.14em; text-transform: uppercase; color: #A30054; }
+    .p-tot .grand span:last-child { font-family: var(--display); font-weight: 800; font-stretch: 112%; font-size: 17pt; letter-spacing: -0.015em; color: #D6006E; }
+    .p-tot .sub { font-size: 9pt; }
+
+    .p-terms .p-kicker { margin-bottom: 2.5mm; }
+    .p-terms ul { margin: 0; padding: 0; list-style: none; }
+    .p-terms li { position: relative; padding-left: 4mm; margin-bottom: 1.8mm; font-size: 8.5pt; color: #453F4C; }
+    .p-terms li::before { content: ''; position: absolute; left: 0; top: 1.9mm; width: 1.4mm; height: 1.4mm; border-radius: 50%; background: #0089C7; }
+
+    .p-foot {
+      margin-top: 12mm; padding-top: 4mm; border-top: 0.25mm solid #E6E0E2;
+      display: flex; justify-content: space-between; gap: 8mm; break-inside: avoid;
+      font-family: var(--mono); font-size: 7.5pt; color: #736C7C; letter-spacing: 0.02em;
+    }
   }
 </style>
 </head>
@@ -2221,24 +2268,63 @@
     var co = state.company;
     var t = computeTotals(q.items, q.gdisc, q.iva);
     var hasDisc = q.items.some(function (it) { return it.disc; });
-    $('print-area').innerHTML =
-      '<div class="p-head"><div>' +
-        (norm(co.name) === norm(DEFAULT_COMPANY.name) ? '<img class="p-logo" src="brand/logo-horizontal.svg" alt="' + esc(co.name) + '">' : '<h1>' + esc(co.name || 'Cotización') + '</h1>') +
-        '<div class="p-co">' + [co.taxId && 'CUIT ' + co.taxId, co.address, co.phone && 'WhatsApp ' + co.phone, co.email, [co.instagram, co.web].filter(Boolean).join(' · ')].filter(Boolean).map(function (l) { return '<div>' + esc(l) + '</div>'; }).join('') + '</div>' +
-      '</div><div style="text-align:right"><div class="p-title">Cotización</div><div class="mono">' + quoteNumber(q.number) + '</div>' +
-        '<div>Fecha: ' + fmtDate(q.date) + '</div><div>Válida hasta: ' + fmtDate(q.validUntil) + '</div></div></div>' +
-      '<div class="p-box"><b>Cliente:</b> ' + esc(c.name) +
-        [c.contact && 'Atención: ' + c.contact, [c.taxId, c.ivaCondition].filter(Boolean).join(' · '), [c.address, c.city, c.province].filter(Boolean).join(', '), [c.phone, c.email].filter(Boolean).join(' · ')]
-          .filter(Boolean).map(function (l) { return '<div>' + esc(l) + '</div>'; }).join('') +
+    var isBrand = norm(co.name) === norm(DEFAULT_COMPANY.name);
+    function lines(arr) { return arr.filter(Boolean).map(function (l) { return esc(l); }).join('<br>'); }
+    function row(label, value, cls) { return '<div class="row' + (cls ? ' ' + cls : '') + '"><span>' + label + '</span><span>' + value + '</span></div>'; }
+
+    var tot = row('Subtotal', fmt(t.gross));
+    if (q.gdisc > 0) tot += row('Descuento ' + pct(q.gdisc), '−' + fmt(t.discount));
+    if (q.iva > 0) tot += row('Neto', fmt(t.net)) + row('IVA ' + pct(q.iva), fmt(t.tax));
+    tot += row('Total', fmt(t.total), 'grand');
+    if (q.senaPct > 0 && t.total > 0) {
+      tot += row('Seña ' + pct(q.senaPct), fmt(t.total * q.senaPct / 100), 'sub');
+      tot += row('Saldo al retirar', fmt(t.total * (1 - q.senaPct / 100)), 'sub');
+    }
+
+    var terms = (q.notes || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+    var contact = [co.phone && 'WhatsApp ' + co.phone, co.email, co.instagram, co.web].filter(Boolean).join('  ·  ');
+
+    var body =
+      '<div class="p-head">' +
+        '<div>' + (isBrand ? '<img class="p-logo" src="brand/logo-horizontal.svg" alt="' + esc(co.name) + '">' : '<div class="p-co-name">' + esc(co.name || '') + '</div>') + '</div>' +
+        '<div class="p-doc"><div class="p-kicker">Cotización</div><div class="p-number">' + quoteNumber(q.number) + '</div></div>' +
       '</div>' +
-      '<table><thead><tr><th>Código</th><th>Descripción</th><th class="num">Cant.</th><th class="num">Precio unit.</th>' + (hasDisc ? '<th class="num">Desc.</th>' : '') + '<th class="num">Importe</th></tr></thead><tbody>' +
+      '<div class="p-rule"></div>' +
+      '<div class="p-meta">' +
+        '<div><div class="p-kicker">Para</div><div class="v"><b>' + esc(c.name) + '</b>' +
+          lines([c.contact && 'Atención: ' + c.contact, [c.taxId, c.ivaCondition].filter(Boolean).join(' · '), [c.address, c.city, c.province].filter(Boolean).join(', '), [c.phone, c.email].filter(Boolean).join(' · ')]) + '</div></div>' +
+        '<div><div class="p-kicker">De</div><div class="v"><b>' + esc(co.name || '') + '</b>' +
+          lines([co.taxId && 'CUIT ' + co.taxId, co.address]) + '</div></div>' +
+        '<div><div class="p-kicker">Fecha</div><div class="v"><b>' + fmtDate(q.date) + '</b></div></div>' +
+        '<div><div class="p-kicker">Válida hasta</div><div class="v"><b>' + fmtDate(q.validUntil) + '</b></div></div>' +
+      '</div>' +
+      '<table class="p-items"><thead><tr><th>Descripción</th><th class="r">Cant.</th><th class="r">Precio unit.</th>' +
+        (hasDisc ? '<th class="r">Desc.</th>' : '') + '<th class="r">Importe</th></tr></thead><tbody>' +
         q.items.map(function (it) {
-          return '<tr><td>' + esc(it.code || '') + '</td><td>' + esc(it.name) + (it.detail ? '<div class="p-detail">' + esc(it.detail) + '</div>' : '') + '</td><td class="num">' + it.qty.toLocaleString('es-AR') + ' ' + esc(it.unit || '') + '</td>' +
-            '<td class="num">' + fmt(it.price) + '</td>' + (hasDisc ? '<td class="num">' + (it.disc ? pct(it.disc) : '') + '</td>' : '') + '<td class="num">' + fmt(lineTotal(it)) + '</td></tr>';
+          return '<tr><td><div class="p-item-name">' + esc(it.name) + '</div>' +
+              (it.code ? '<div class="p-item-code">' + esc(it.code) + '</div>' : '') +
+              (it.detail ? '<div class="p-detail">' + esc(it.detail) + '</div>' : '') + '</td>' +
+            '<td class="r">' + it.qty.toLocaleString('es-AR') + ' ' + esc(it.unit || '') + '</td>' +
+            '<td class="r">' + fmt(it.price) + '</td>' +
+            (hasDisc ? '<td class="r">' + (it.disc ? pct(it.disc) : '—') + '</td>' : '') +
+            '<td class="r amount">' + fmt(lineTotal(it)) + '</td></tr>';
         }).join('') +
       '</tbody></table>' +
-      '<div class="p-totals totals">' + totalsHTML(t, q.iva, q.gdisc, q.senaPct) + '</div>' +
-      (q.notes ? '<div class="p-notes"><div class="p-label">Condiciones</div>' + esc(q.notes) + '</div>' : '');
+      '<div class="p-bottom">' +
+        '<div class="p-terms">' + (terms.length ? '<div class="p-kicker">Condiciones</div><ul>' + terms.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul>' : '') + '</div>' +
+        '<div class="p-tot">' + tot + '</div>' +
+      '</div>' +
+      '<div class="p-foot"><span>' + esc(contact || co.name || '') + '</span><span>' + quoteNumber(q.number) + '</span></div>';
+
+    $('print-area').innerHTML = '<table class="p-page"><thead><tr><td></td></tr></thead><tfoot><tr><td></td></tr></tfoot><tbody><tr><td>' + body + '</td></tr></tbody></table>';
+
+    // El nombre del PDF sale del título de la página.
+    var prevTitle = document.title;
+    document.title = quoteNumber(q.number) + ' - ' + c.name;
+    window.addEventListener('afterprint', function restore() {
+      document.title = prevTitle;
+      window.removeEventListener('afterprint', restore);
+    });
     window.print();
   }
 
