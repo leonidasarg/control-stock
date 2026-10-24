@@ -1344,7 +1344,7 @@
     </ol>
     <div class="grid">
       <div class="field span-2"><label for="cl-url">Project URL</label><input id="cl-url" value="https://iusgkfvlheqllevpxrbl.supabase.co" placeholder="https://xxxxxxxx.supabase.co" autocomplete="off" required></div>
-      <div class="field span-2"><label for="cl-key">Clave pública (anon o publishable)</label><input id="cl-key" placeholder="eyJhbGciOi… o sb_publishable_…" autocomplete="off" required></div>
+      <div class="field span-2"><label for="cl-key">Clave pública (anon o publishable)</label><input id="cl-key" value="sb_publishable_JC-tuVTFctdwg-pYFYT7Pg_TSCaeErb" placeholder="eyJhbGciOi… o sb_publishable_…" autocomplete="off" required></div>
     </div>
     <p class="faint">Nunca pegues la clave <b>service_role</b> ni la <b>secret</b>: esas dan acceso total.</p>
     <p class="form-error" id="cl-config-error" hidden></p>
@@ -1519,7 +1519,8 @@
     return d.toLocaleDateString('es-AR') + ' ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
   }
 
-  function quoteNumber(n) { return 'COT-' + String(n).padStart(4, '0'); }
+  // Sin número: se guardó sin conexión y lo recibe de la nube al volver internet.
+  function quoteNumber(n) { return n == null ? 'COT-pendiente' : 'COT-' + String(n).padStart(4, '0'); }
 
   var toastTimer;
   function toast(msg) {
@@ -1939,6 +1940,49 @@
     };
   }
 
+  function renderDraftTitle() {
+    var editing = draft.editingId && state.quotes.find(function (q) { return q.id === draft.editingId; });
+    $('quote-title').textContent = editing ? 'Editando ' + quoteNumber(editing.number)
+      : draft.number ? 'Nueva cotización · ' + quoteNumber(draft.number) : 'Nueva cotización';
+  }
+
+  // ---------- Numeración ----------
+  // Con la nube conectada el número lo reparte Supabase (cotizador_next_quote_number): quien empieza
+  // primero una cotización se lleva el siguiente, aunque haya otra sesión abierta al mismo tiempo.
+  // Se reserva al elegir el cliente o el primer producto. Sin nube se usa el contador de este navegador.
+  function rpcNextNumber() {
+    return cloud.sb.rpc('cotizador_next_quote_number').then(check).then(function (res) {
+      state.seq = Math.max(state.seq, res.data);
+      save(KEYS.seq, state.seq);
+      return res.data;
+    });
+  }
+
+  // Pasa por la cola de la nube para no adelantarse a una sincronización en curso.
+  function reserveNumber() {
+    if (!cloud.user) return Promise.resolve(null);
+    var p = cloud.queue.then(rpcNextNumber);
+    cloud.queue = p.catch(function () {});
+    return p;
+  }
+
+  function releaseNumber(n) {
+    if (cloud.user && n) cloud.sb.rpc('cotizador_release_quote_number', { p_number: n }).then(function () {}, function () {});
+  }
+
+  function maybeReserveNumber() {
+    var d = draft;
+    if (d.editingId || d.number || d.reserving || !cloud.user) return;
+    d.reserving = reserveNumber().then(function (n) {
+      if (draft === d && !d.saved) { d.number = n; renderDraftTitle(); }
+      else releaseNumber(n);
+    }, function () {}).then(function () { d.reserving = null; });
+  }
+
+  function discardDraft() {
+    if (draft && draft.number && !draft.saved) releaseNumber(draft.number);
+  }
+
   function loadDraftIntoForm() {
     $('q-date').value = draft.date;
     $('q-valid').value = draft.validDays;
@@ -1949,7 +1993,7 @@
     $('q-notes').value = draft.notes;
     $('q-client-search').value = '';
     var editing = draft.editingId && state.quotes.find(function (q) { return q.id === draft.editingId; });
-    $('quote-title').textContent = editing ? 'Editando ' + quoteNumber(editing.number) : 'Nueva cotización';
+    renderDraftTitle();
     $('quote-subtitle').textContent = editing
       ? 'Los cambios se guardan sobre la misma cotización y quedan anotados en su historial.'
       : 'Elegí el cliente, sumá productos y guardala para hacerle seguimiento.';
@@ -1983,12 +2027,12 @@
   setupPicker($('q-client-search'), $('q-client-sugg'),
     function (q) { return state.clients.filter(function (c) { return clientMatches(c, q); }); },
     function (c) { return '<span>' + esc(c.name) + '</span><span class="mono">' + esc(c.taxId || c.phone || c.city || '') + '</span>'; },
-    function (c) { draft.clientId = c.id; $('q-client-search').value = ''; renderDraftClient(); }
+    function (c) { draft.clientId = c.id; $('q-client-search').value = ''; renderDraftClient(); maybeReserveNumber(); }
   );
 
   $('q-new-client').addEventListener('click', function () {
     var typed = $('q-client-search').value.trim();
-    openClientForm(null, function (c) { draft.clientId = c.id; $('q-client-search').value = ''; renderDraftClient(); });
+    openClientForm(null, function (c) { draft.clientId = c.id; $('q-client-search').value = ''; renderDraftClient(); maybeReserveNumber(); });
     if (typed) $('cf-name').value = typed;
   });
 
@@ -2001,6 +2045,7 @@
     }
     $('q-prod-search').value = '';
     renderDraftItems();
+    maybeReserveNumber();
     if (!(p.price > 0)) toast('"' + p.name + '" no tiene precio: cargalo en la línea');
     var focusIndex = draft.items.indexOf(existing || draft.items[draft.items.length - 1]);
     var qtyInput = document.querySelector('#q-items tr[data-i="' + focusIndex + '"] .qty');
@@ -2022,6 +2067,7 @@
   $('q-free-item').addEventListener('click', function (e) {
     e.preventDefault();
     draft.items.push({ productId: null, code: '', name: '', unit: 'un', qty: 1, price: 0, cost: 0, disc: 0, free: true });
+    maybeReserveNumber();
     renderDraftItems();
     var inputs = document.querySelectorAll('#q-items .free-name');
     if (inputs.length) inputs[inputs.length - 1].focus();
@@ -2099,6 +2145,7 @@
 
   $('q-reset').addEventListener('click', function () {
     if (draft.items.length && !confirm('Se va a descartar lo que cargaste. ¿Seguro?')) return;
+    discardDraft();
     newDraft();
     loadDraftIntoForm();
   });
@@ -2135,31 +2182,46 @@
       total: totals.total
     };
 
-    var quote;
-    if (draft.editingId) {
-      quote = state.quotes.find(function (q) { return q.id === draft.editingId; });
-      Object.assign(quote, fields);
-      if (quote.status === 'vencida' && quote.validUntil >= todayISO()) quote.status = 'enviada';
-      quote.log.push({ ts: Date.now(), text: 'Cotización modificada. Nuevo total: ' + fmt(totals.total) + '.' });
-    } else {
+    var d = draft;
+    function finish(number) {
+      var quote;
+      if (d.editingId) {
+        quote = state.quotes.find(function (q) { return q.id === d.editingId; });
+        Object.assign(quote, fields);
+        if (quote.status === 'vencida' && quote.validUntil >= todayISO()) quote.status = 'enviada';
+        quote.log.push({ ts: Date.now(), text: 'Cotización modificada. Nuevo total: ' + fmt(totals.total) + '.' });
+      } else {
+        quote = Object.assign({
+          id: uid(),
+          number: number,
+          status: 'borrador',
+          createdAt: Date.now(),
+          log: [{ ts: Date.now(), text: 'Cotización creada por ' + fmt(totals.total) + '.' }]
+        }, fields);
+        state.quotes.push(quote);
+      }
+      d.saved = true;
+      persist('quotes');
+      toast(number == null && !d.editingId ? 'Guardada sin conexión: el número se asigna al volver internet' : quoteNumber(quote.number) + ' guardada');
+      newDraft();
+      loadDraftIntoForm();
+      selectedQuoteId = quote.id;
+      $('qs-filter').value = 'todas';
+      showView('cotizaciones');
+    }
+
+    if (d.editingId) return finish();
+    if (!cloud.user) {
       state.seq += 1;
       persist('seq');
-      quote = Object.assign({
-        id: uid(),
-        number: state.seq,
-        status: 'borrador',
-        createdAt: Date.now(),
-        log: [{ ts: Date.now(), text: 'Cotización creada por ' + fmt(totals.total) + '.' }]
-      }, fields);
-      state.quotes.push(quote);
+      return finish(state.seq);
     }
-    persist('quotes');
-    toast(quoteNumber(quote.number) + ' guardada');
-    newDraft();
-    loadDraftIntoForm();
-    selectedQuoteId = quote.id;
-    $('qs-filter').value = 'todas';
-    showView('cotizaciones');
+    if (d.number) return finish(d.number);
+    var btn = $('q-save');
+    btn.disabled = true;
+    (d.reserving ? d.reserving.then(function () { return d.number || reserveNumber(); }) : reserveNumber())
+      .then(function (n) { return n; }, function () { return null; })
+      .then(function (n) { btn.disabled = false; finish(n == null ? null : n); });
   });
 
   // ---------- Cotizaciones ----------
@@ -2225,7 +2287,7 @@
       if (STATUSES[filter] && x.status !== filter) return false;
       if (q && norm(quoteNumber(x.number) + ' ' + quoteClient(x).name).indexOf(q) === -1) return false;
       return true;
-    }).sort(function (a, b) { return b.number - a.number; });
+    }).sort(function (a, b) { return (b.number || 1e9) - (a.number || 1e9); });
 
     $('qs-list').innerHTML = list.length ? list.map(function (x) {
       var fc = followClass(x);
@@ -2384,6 +2446,9 @@
       var b = e.target.closest('[data-act]');
       if (!b) return;
       var act = b.dataset.act;
+      if (q.number == null && (act === 'print' || act === 'whatsapp' || act === 'email')) {
+        return toast('Todavía no tiene número: se asigna cuando vuelva la conexión.');
+      }
       if (act === 'print') printQuote(q);
       if (act === 'whatsapp') sendWhatsApp(q);
       if (act === 'email') sendEmail(q);
@@ -2401,6 +2466,7 @@
 
   function loadQuoteIntoDraft(q, duplicate) {
     if (draft.items.length && !confirm('Tenés una cotización a medio cargar. ¿Reemplazarla?')) return;
+    discardDraft();
     var today = todayISO();
     draft = {
       editingId: duplicate ? null : q.id,
@@ -2652,7 +2718,36 @@
     cloud.timer = setTimeout(function () { cloudRun(cloudPush); }, 800);
   }
 
+  // Antes de subir: las cotizaciones guardadas sin conexión reciben número, y si una nueva quedó con un
+  // número que ya existe (por ejemplo, de antes de conectar la nube) recibe uno nuevo. Las que ya están
+  // en la nube nunca cambian de número.
+  function assignMissingNumbers() {
+    var snap = cloudSnapshot(), seen = {}, todo = [];
+    state.quotes.slice().sort(function (a, b) {
+      return ((b.id in snap.quotes) - (a.id in snap.quotes)) || ((a.createdAt || 0) - (b.createdAt || 0));
+    }).forEach(function (q) {
+      if (q.number == null || seen[q.number]) todo.push(q);
+      else seen[q.number] = true;
+    });
+    if (!todo.length) return Promise.resolve();
+    return todo.reduce(function (p, q) {
+      return p.then(rpcNextNumber).then(function (n) {
+        var old = q.number;
+        q.number = n;
+        q.log.push({ ts: Date.now(), text: old == null ? 'Número asignado al conectarse: ' + quoteNumber(n) + '.' : 'Número cambiado de ' + quoteNumber(old) + ' a ' + quoteNumber(n) + ' porque estaba repetido.' });
+      });
+    }, Promise.resolve()).then(function () {
+      save(KEYS.quotes, state.quotes);
+      refreshAfterSync();
+      toast(todo.length === 1 ? quoteNumber(todo[0].number) + ': número asignado' : todo.length + ' cotizaciones recibieron número');
+    });
+  }
+
   function cloudPush() {
+    return assignMissingNumbers().then(pushChanges);
+  }
+
+  function pushChanges() {
     var snap = cloudSnapshot(), cur = localMaps(), upserts = [], deletes = {};
     var now = new Date().toISOString();
     Object.keys(cur).forEach(function (kind) {
@@ -2746,7 +2841,12 @@
     var msg = (err && (err.message || err.error_description)) || String(err);
     if (/fetch|network|Load failed/i.test(msg)) {
       setCloudStatus('error', 'Sin conexión: los cambios quedan guardados acá y se suben cuando vuelva internet.');
-    } else if (err && (err.code === 'PGRST205' || err.code === '42P01')) {
+    } else if (err && err.code === '23505' && !cloud.retried) {
+      // Otra sesión subió el mismo número justo ahora: se baja lo nuevo y se renumera lo propio.
+      cloud.retried = true;
+      setTimeout(function () { cloudRun(cloudPull).then(function () { cloud.retried = false; }); }, 300);
+      setCloudStatus('syncing');
+    } else if (err && (err.code === 'PGRST205' || err.code === '42P01' || err.code === 'PGRST202')) {
       setCloudStatus('error', 'Falta crear la tabla en Supabase: corré el archivo supabase/schema.sql en el SQL Editor.');
     } else {
       setCloudStatus('error', 'No se pudo sincronizar: ' + msg);
@@ -2768,7 +2868,15 @@
     if ($('dlg-cloud').open) renderCloudDialog();
   }
 
-  function cloudConfig() { return load(CLOUD_CFG_KEY, null); }
+  // Proyecto de Vestí Tu Negocio. La clave publishable es pública por diseño: lo que protege los datos
+  // es el inicio de sesión y Row Level Security. Se puede cambiar desde "Cambiar proyecto".
+  var DEFAULT_CLOUD = { url: 'https://iusgkfvlheqllevpxrbl.supabase.co', key: 'sb_publishable_JC-tuVTFctdwg-pYFYT7Pg_TSCaeErb' };
+
+  function cloudConfig() {
+    var cfg = load(CLOUD_CFG_KEY, null);
+    if (cfg && cfg.disabled) return null;
+    return cfg || DEFAULT_CLOUD;
+  }
 
   function startCloud() {
     var cfg = cloudConfig();
@@ -2876,7 +2984,7 @@
     if (act === 'reset') {
       if (!confirm('¿Desconectar este proyecto de Supabase? Los datos de este navegador no se borran.')) return;
       (cloud.sb ? cloud.sb.auth.signOut() : Promise.resolve()).catch(function () {}).then(function () {
-        save(CLOUD_CFG_KEY, null);
+        save(CLOUD_CFG_KEY, { disabled: true });
         cloud.sb = null;
         cloud.user = null;
         setCloudStatus('off');

@@ -24,6 +24,8 @@ Por defecto todo se guarda en el navegador. Si conectás Supabase, además queda
 1. En tu proyecto de Supabase, abrí **SQL Editor → New query**, pegá el contenido de [`supabase/schema.sql`](supabase/schema.sql) y tocá **Run**. Crea la tabla `cotizador_items` con Row Level Security: cada usuario ve y edita solo lo suyo.
 2. En **Authentication → Users → Add user** creá tu usuario con email y contraseña, con **Auto Confirm User** tildado. Si no querés que nadie más se registre, en **Authentication → Sign In / Providers** desactivá **Allow new users to sign up**.
 3. En **Project Settings → API** copiá la clave pública (**anon** o **publishable**). Nunca uses la **service_role** ni la **secret**.
-4. En el cotizador tocá **Nube** (menú, en Ajustes), pegá la URL del proyecto y la clave, y entrá con tu usuario. La primera vez sube todo lo que ya tenías en ese navegador.
+4. En el cotizador tocá **Nube** (menú, en Ajustes) y entrá con tu usuario. El proyecto de Vestí Tu Negocio ya viene cargado; para usar otro, tocá **Cambiar proyecto** y pegá su URL y clave. La primera vez sube todo lo que ya tenías en ese navegador.
+
+**Números de cotización sin repetir.** Con la nube conectada, el número lo reparte Supabase con un contador que se bloquea mientras se incrementa: el primero que empieza una cotización (al elegir el cliente o el primer producto) se lleva el siguiente número, aunque haya otra sesión abierta al mismo tiempo. Si descartás la cotización, el número se devuelve, siempre que siga siendo el último. Además, la base rechaza dos cotizaciones con el mismo número. Si guardás sin conexión, queda como *COT-pendiente* (no se puede imprimir ni mandar) y recibe su número apenas vuelve internet.
 
 En cada compu o celular nuevo repetís el paso 4 y se baja todo. El puntito al lado de **Nube** muestra el estado: verde sincronizado, celeste sincronizando, naranja pendiente (sin conexión) y magenta falta iniciar sesión.
