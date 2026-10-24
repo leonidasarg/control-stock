@@ -93,6 +93,8 @@
 
   * { box-sizing: border-box; }
 
+  [hidden] { display: none !important; }
+
   body {
     margin: 0;
     background: var(--bg);
@@ -206,6 +208,45 @@
   }
 
   .main { min-width: 0; }
+
+  /* ---------- Pantalla de entrada ---------- */
+  .auth { display: none; min-height: 100vh; place-items: center; padding: 24px 16px; }
+  body.locked .auth { display: grid; }
+  body.locked .app { display: none; }
+  .auth-card {
+    width: min(420px, 100%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 32px 28px 28px;
+    text-align: center;
+  }
+  .auth-logo { width: 200px; max-width: 80%; height: auto; display: block; margin: 0 auto; }
+  .auth-logo.logo-dark { display: none; }
+  :root[data-theme="dark"] .auth-logo.logo-light { display: none; }
+  :root[data-theme="dark"] .auth-logo.logo-dark { display: block; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .auth-logo.logo-light { display: none; }
+    :root:not([data-theme="light"]) .auth-logo.logo-dark { display: block; }
+  }
+  .auth-card .brand-eyebrow { margin: 10px 0 22px; }
+  .auth-panel { text-align: left; }
+  .auth-panel form, form.auth-panel { display: grid; gap: 14px; }
+  #auth-pending, #auth-offline, #auth-loading { text-align: center; }
+  .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--surface-sunken); border-radius: 10px; padding: 4px; margin-bottom: 18px; }
+  .auth-tab { font: inherit; font-weight: 600; font-size: 14px; border: none; border-radius: 7px; padding: 9px; background: transparent; color: var(--ink-muted); cursor: pointer; }
+  .auth-tab.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+  .auth-submit { width: 100%; padding: 12px; margin-top: 2px; }
+  .auth-link { margin: 0; text-align: center; font-size: 14px; }
+  .auth-note { margin: 0; text-align: center; }
+  .auth-msg { margin: 14px 0 0; font-size: 14px; padding: 10px 12px; border-radius: 8px; background: var(--bad-wash); color: var(--bad); }
+  .auth-msg.ok { background: var(--good-wash); color: var(--good); }
+
+  .role-badge { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+  .role-owner { background: var(--accent-wash); color: var(--accent-strong); }
+  .role-member { background: var(--good-wash); color: var(--good); }
+  .role-pending { background: var(--warn-wash); color: var(--warn); }
 
   .cloud-dot {
     margin-left: auto;
@@ -908,7 +949,74 @@
   }
 </style>
 </head>
-<body>
+<body class="locked">
+<div class="auth" id="auth">
+  <div class="auth-card">
+    <img class="auth-logo logo-light" src="brand/logo-horizontal.svg" alt="Vestí Tu Negocio">
+    <img class="auth-logo logo-dark" src="brand/logo-horizontal-oscuro.svg" alt="Vestí Tu Negocio">
+    <p class="brand-eyebrow">Cotizador</p>
+
+    <div class="auth-panel" id="auth-loading"><p class="muted">Conectando…</p></div>
+
+    <div class="auth-panel" id="auth-forms" hidden>
+      <div class="auth-tabs" role="tablist">
+        <button type="button" class="auth-tab active" data-auth-tab="login" role="tab">Iniciar sesión</button>
+        <button type="button" class="auth-tab" data-auth-tab="signup" role="tab">Crear cuenta</button>
+      </div>
+
+      <form id="login-form" novalidate>
+        <div class="field"><label for="li-email">Email</label><input id="li-email" type="email" autocomplete="username" required></div>
+        <div class="field"><label for="li-pass">Contraseña</label><input id="li-pass" type="password" autocomplete="current-password" required></div>
+        <button type="submit" class="btn btn-primary auth-submit">Entrar</button>
+        <p class="auth-link"><a href="#" data-auth-tab="forgot">¿Olvidaste tu contraseña?</a></p>
+      </form>
+
+      <form id="signup-form" novalidate hidden>
+        <div class="field"><label for="su-email">Email</label><input id="su-email" type="email" autocomplete="username" required></div>
+        <div class="field"><label for="su-pass">Contraseña (mínimo 6 caracteres)</label><input id="su-pass" type="password" autocomplete="new-password" minlength="6" required></div>
+        <div class="field"><label for="su-pass2">Repetí la contraseña</label><input id="su-pass2" type="password" autocomplete="new-password" required></div>
+        <button type="submit" class="btn btn-primary auth-submit">Crear cuenta</button>
+        <p class="faint auth-note">La primera cuenta es la del dueño. Las siguientes entran cuando el dueño las aprueba desde <b>Usuarios</b>.</p>
+      </form>
+
+      <form id="forgot-form" novalidate hidden>
+        <p class="muted" style="margin-top:0">Te mandamos un email con un link para elegir una contraseña nueva.</p>
+        <div class="field"><label for="fg-email">Email</label><input id="fg-email" type="email" autocomplete="username" required></div>
+        <button type="submit" class="btn btn-primary auth-submit">Mandarme el link</button>
+        <p class="auth-link"><a href="#" data-auth-tab="login">Volver a iniciar sesión</a></p>
+      </form>
+
+      <p class="auth-msg" id="auth-msg" hidden></p>
+    </div>
+
+    <form class="auth-panel" id="recovery-form" novalidate hidden>
+      <p class="muted" style="margin-top:0">Elegí tu contraseña nueva.</p>
+      <div class="field"><label for="rc-pass">Contraseña nueva</label><input id="rc-pass" type="password" autocomplete="new-password" minlength="6" required></div>
+      <div class="field"><label for="rc-pass2">Repetila</label><input id="rc-pass2" type="password" autocomplete="new-password" required></div>
+      <button type="submit" class="btn btn-primary auth-submit">Guardar contraseña</button>
+      <p class="auth-msg" id="recovery-msg" hidden></p>
+    </form>
+
+    <div class="auth-panel" id="auth-pending" hidden>
+      <p><b>Tu cuenta está esperando aprobación.</b></p>
+      <p class="muted" id="auth-pending-text"></p>
+      <div class="actions" style="justify-content:center">
+        <button type="button" class="btn btn-primary" data-auth="recheck">Ya me aprobaron</button>
+        <button type="button" class="btn btn-ghost" data-auth="logout">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <div class="auth-panel" id="auth-offline" hidden>
+      <p><b>Sin conexión.</b></p>
+      <p class="muted" id="auth-offline-text"></p>
+      <div class="actions" style="justify-content:center">
+        <button type="button" class="btn btn-primary" data-auth="offline" id="auth-offline-btn" hidden>Seguir sin conexión</button>
+        <button type="button" class="btn btn-ghost" data-auth="reload">Reintentar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="app">
   <aside class="sidebar" id="sidebar" aria-label="Menú">
     <div class="sidebar-brand">
@@ -934,7 +1042,8 @@
         <button type="button" class="menu-item small" id="b-export"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Descargar copia</button>
         <label class="menu-item small" for="b-import"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></svg>Restaurar copia</label>
         <input type="file" id="b-import" accept="application/json,.json" hidden>
-        <button type="button" class="menu-item small" id="b-cloud"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10.5a4 4 0 0 0 .6-7.96A6 6 0 0 0 6.4 9.1 4.5 4.5 0 0 0 7 18Z"/></svg>Nube <span class="cloud-dot" id="cloud-dot" data-status="off"></span></button>
+        <button type="button" class="menu-item small" data-view="usuarios" id="menu-users" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>Usuarios <span class="count" id="pending-count" hidden></span></button>
+        <button type="button" class="menu-item small" id="b-cloud"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.2-6 8-6s7 2 8 6"/></svg><span>Mi cuenta</span> <span class="cloud-dot" id="cloud-dot" data-status="off"></span></button>
       </nav>
     </div>
 
@@ -1145,6 +1254,23 @@
   </section>
 
   <!-- ================= PRODUCTOS ================= -->
+  <section class="view" id="view-usuarios">
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <h2>Usuarios</h2>
+          <p class="hint">Quién puede entrar al cotizador. Las cuentas nuevas quedan pendientes hasta que las aprobás.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Email</th><th>Permiso</th><th>Desde</th><th></th></tr></thead>
+          <tbody id="members-list"></tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
   <section class="view" id="view-productos">
     <section class="card">
       <div class="card-head">
@@ -1332,49 +1458,12 @@
 </dialog>
 
 <dialog id="dlg-cloud">
-  <h2>Guardar en la nube</h2>
-
-  <form method="dialog" id="cloud-config-form" hidden>
-    <p class="muted" style="margin-top:0">Conectá tu proyecto de Supabase y todo queda guardado en la nube: lo ves igual desde la compu, el celular o cualquier navegador.</p>
-    <ol class="steps-help">
-      <li>Creá un proyecto gratis en <b>supabase.com</b>.</li>
-      <li>En <b>SQL Editor</b> pegá el contenido del archivo <code>supabase/schema.sql</code> y tocá <b>Run</b>.</li>
-      <li>En <b>Authentication → Users → Add user</b> creá tu usuario con email y contraseña, con <b>Auto Confirm User</b> tildado.</li>
-      <li>En <b>Project Settings → API</b> copiá la <b>Project URL</b> y la clave pública (<b>anon</b> o <b>publishable</b>) y pegalas acá abajo.</li>
-    </ol>
-    <div class="grid">
-      <div class="field span-2"><label for="cl-url">Project URL</label><input id="cl-url" value="https://iusgkfvlheqllevpxrbl.supabase.co" placeholder="https://xxxxxxxx.supabase.co" autocomplete="off" required></div>
-      <div class="field span-2"><label for="cl-key">Clave pública (anon o publishable)</label><input id="cl-key" placeholder="eyJhbGciOi… o sb_publishable_…" autocomplete="off" required></div>
-    </div>
-    <p class="faint">Nunca pegues la clave <b>service_role</b> ni la <b>secret</b>: esas dan acceso total.</p>
-    <p class="form-error" id="cl-config-error" hidden></p>
-    <div class="actions">
-      <button type="submit" class="btn btn-primary">Guardar y seguir</button>
-      <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
-    </div>
-  </form>
-
-  <form method="dialog" id="cloud-login-form" hidden>
-    <p class="muted" style="margin-top:0">Entrá con el usuario que creaste en Supabase.</p>
-    <div class="grid">
-      <div class="field span-2"><label for="cl-email">Email</label><input id="cl-email" type="email" autocomplete="username" required></div>
-      <div class="field span-2"><label for="cl-pass">Contraseña</label><input id="cl-pass" type="password" autocomplete="current-password" required></div>
-    </div>
-    <p class="form-error" id="cl-login-error" hidden></p>
-    <div class="actions">
-      <button type="submit" class="btn btn-primary">Entrar</button>
-      <button type="button" class="btn btn-ghost" data-close>Cerrar</button>
-      <button type="button" class="btn btn-ghost" data-cloud="reset" style="margin-left:auto">Cambiar proyecto</button>
-    </div>
-  </form>
-
-  <div id="cloud-on" hidden>
-    <div class="cloud-state" id="cloud-state"></div>
-    <div class="actions">
-      <button type="button" class="btn btn-primary" data-cloud="sync">Sincronizar ahora</button>
-      <button type="button" class="btn btn-ghost" data-close>Cerrar</button>
-      <button type="button" class="btn btn-danger" data-cloud="logout" style="margin-left:auto">Cerrar sesión</button>
-    </div>
+  <h2>Mi cuenta</h2>
+  <div class="cloud-state" id="cloud-state"></div>
+  <div class="actions">
+    <button type="button" class="btn btn-primary" data-cloud="sync">Sincronizar ahora</button>
+    <button type="button" class="btn btn-ghost" data-close>Cerrar</button>
+    <button type="button" class="btn btn-danger" data-cloud="logout" style="margin-left:auto">Cerrar sesión</button>
   </div>
 </dialog>
 
@@ -1612,7 +1701,7 @@
 
   // ---------- Navegación ----------
   var currentView = 'nueva';
-  var VIEW_TITLES = { nueva: 'Nueva cotización', cotizaciones: 'Cotizaciones', clientes: 'Clientes', productos: 'Productos' };
+  var VIEW_TITLES = { nueva: 'Nueva cotización', cotizaciones: 'Cotizaciones', clientes: 'Clientes', productos: 'Productos', usuarios: 'Usuarios' };
 
   function setMenuOpen(open) {
     document.body.classList.toggle('menu-open', open);
@@ -1628,6 +1717,7 @@
     if (name === 'cotizaciones') renderQuotes();
     if (name === 'clientes') renderClients();
     if (name === 'productos') renderProducts();
+    if (name === 'usuarios') renderMembers();
     try { localStorage.setItem('cotizador_vista', name); } catch (e) {}
   }
 
@@ -1947,9 +2037,9 @@
   }
 
   // ---------- Numeración ----------
-  // Con la nube conectada el número lo reparte Supabase (cotizador_next_quote_number): quien empieza
-  // primero una cotización se lleva el siguiente, aunque haya otra sesión abierta al mismo tiempo.
-  // Se reserva al elegir el cliente o el primer producto. Sin nube se usa el contador de este navegador.
+  // El número lo reparte Supabase (cotizador_next_quote_number): quien empieza primero una cotización
+  // se lleva el siguiente, aunque haya otra sesión abierta al mismo tiempo. Se reserva al elegir el
+  // cliente o el primer producto.
   function rpcNextNumber() {
     return cloud.sb.rpc('cotizador_next_quote_number').then(check).then(function (res) {
       state.seq = Math.max(state.seq, res.data);
@@ -1960,19 +2050,19 @@
 
   // Pasa por la cola de la nube para no adelantarse a una sincronización en curso.
   function reserveNumber() {
-    if (!cloud.user) return Promise.resolve(null);
+    if (!canSync()) return Promise.resolve(null);
     var p = cloud.queue.then(rpcNextNumber);
     cloud.queue = p.catch(function () {});
     return p;
   }
 
   function releaseNumber(n) {
-    if (cloud.user && n) cloud.sb.rpc('cotizador_release_quote_number', { p_number: n }).then(function () {}, function () {});
+    if (canSync() && n) cloud.sb.rpc('cotizador_release_quote_number', { p_number: n }).then(function () {}, function () {});
   }
 
   function maybeReserveNumber() {
     var d = draft;
-    if (d.editingId || d.number || d.reserving || !cloud.user) return;
+    if (d.editingId || d.number || d.reserving || !canSync()) return;
     d.reserving = reserveNumber().then(function (n) {
       if (draft === d && !d.saved) { d.number = n; renderDraftTitle(); }
       else releaseNumber(n);
@@ -2211,12 +2301,9 @@
     }
 
     if (d.editingId) return finish();
-    if (!cloud.user) {
-      state.seq += 1;
-      persist('seq');
-      return finish(state.seq);
-    }
     if (d.number) return finish(d.number);
+    // Sin conexión con la nube queda pendiente: el número lo asigna Supabase al volver internet.
+    if (!canSync()) return finish(null);
     var btn = $('q-save');
     btn.disabled = true;
     (d.reserving ? d.reserving.then(function () { return d.number || reserveNumber(); }) : reserveNumber())
@@ -2673,23 +2760,30 @@
   });
 
   // ---------- Nube (Supabase) ----------
-  // Los datos siguen viviendo en el navegador (anda sin internet) y, si conectás Supabase, se copian
-  // a tu proyecto: cada cambio se sube y al abrir la app o volver a la pestaña se baja lo de otros
-  // dispositivos. Para saber qué cambió se guarda una foto de lo último que quedó en la nube.
-  var CLOUD_CFG_KEY = 'cotizador_nube_config_v1';
-  var CLOUD_SNAP_KEY = 'cotizador_nube_foto_v1';
-  var CLOUD_TABLE = 'cotizador_items';
+  // Todo se guarda en la nube del negocio. El navegador guarda una copia para que la app abra rápido
+  // y siga andando sin internet: cada cambio se sube y al abrir la app o volver a la pestaña se baja
+  // lo que cambió en otros dispositivos. Para saber qué cambió se guarda una foto de lo último subido.
+  //
+  // La URL y la clave publishable son públicas por diseño (cualquier web con Supabase las lleva):
+  // los datos los protegen el inicio de sesión y las reglas de la base (supabase/schema.sql).
+  // Nunca va acá la clave service_role / secret.
+  var SUPABASE_URL = 'https://iusgkfvlheqllevpxrbl.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_JC-tuVTFctdwg-pYFYT7Pg_TSCaeErb';
+
+  var CLOUD_SNAP_KEY = 'cotizador_nube_foto_v2';
+  var LAST_USER_KEY = 'cotizador_ultimo_usuario_v1';
+  var CLOUD_TABLE = 'cotizador_data';
   var CLOUD_KINDS = ['clients', 'products', 'quotes'];
-  var cloud = { sb: null, user: null, status: 'off', message: '', lastSync: 0, lastPull: 0, timer: null, queue: Promise.resolve() };
+  var cloud = { sb: null, user: null, role: null, status: 'off', message: '', lastSync: 0, lastPull: 0, timer: null, queue: Promise.resolve() };
 
   function emptyMaps() { return { clients: {}, products: {}, quotes: {}, settings: {} }; }
 
   function cloudSnapshot() {
     var snap = load(CLOUD_SNAP_KEY, null);
-    return snap && cloud.user && snap.userId === cloud.user.id ? snap.maps : emptyMaps();
+    return snap && snap.maps ? snap.maps : emptyMaps();
   }
 
-  function saveSnapshot(maps) { save(CLOUD_SNAP_KEY, { userId: cloud.user.id, maps: maps }); }
+  function saveSnapshot(maps) { save(CLOUD_SNAP_KEY, { maps: maps }); }
 
   // Cada registro se compara como texto JSON.
   function localMaps() {
@@ -2706,21 +2800,22 @@
     return res;
   }
 
+  function canSync() { return !!(cloud.sb && cloud.user && (cloud.role === 'owner' || cloud.role === 'member')); }
+
   // Las operaciones van de a una para que una bajada no se cruce con una subida.
   function cloudRun(fn) {
-    cloud.queue = cloud.queue.then(function () { return cloud.user ? fn() : null; }).catch(cloudError);
+    cloud.queue = cloud.queue.then(function () { return canSync() ? fn() : null; }).catch(cloudError);
     return cloud.queue;
   }
 
   function schedulePush() {
-    if (!cloud.user) return;
+    if (!canSync()) return;
     clearTimeout(cloud.timer);
     cloud.timer = setTimeout(function () { cloudRun(cloudPush); }, 800);
   }
 
   // Antes de subir: las cotizaciones guardadas sin conexión reciben número, y si una nueva quedó con un
-  // número que ya existe (por ejemplo, de antes de conectar la nube) recibe uno nuevo. Las que ya están
-  // en la nube nunca cambian de número.
+  // número que ya existe recibe uno nuevo. Las que ya están en la nube nunca cambian de número.
   function assignMissingNumbers() {
     var snap = cloudSnapshot(), seen = {}, todo = [];
     state.quotes.slice().sort(function (a, b) {
@@ -2753,7 +2848,7 @@
     Object.keys(cur).forEach(function (kind) {
       Object.keys(cur[kind]).forEach(function (id) {
         if (snap[kind][id] !== cur[kind][id]) {
-          upserts.push({ user_id: cloud.user.id, kind: kind, id: id, data: JSON.parse(cur[kind][id]), updated_at: now });
+          upserts.push({ kind: kind, id: id, data: JSON.parse(cur[kind][id]), updated_at: now });
         }
       });
       Object.keys(snap[kind]).forEach(function (id) {
@@ -2765,7 +2860,7 @@
     setCloudStatus('syncing');
     var ops = [];
     for (var i = 0; i < upserts.length; i += 500) {
-      ops.push(cloud.sb.from(CLOUD_TABLE).upsert(upserts.slice(i, i + 500), { onConflict: 'user_id,kind,id' }).then(check));
+      ops.push(cloud.sb.from(CLOUD_TABLE).upsert(upserts.slice(i, i + 500), { onConflict: 'kind,id' }).then(check));
     }
     Object.keys(deletes).forEach(function (kind) {
       ops.push(cloud.sb.from(CLOUD_TABLE).delete().eq('kind', kind).in('id', deletes[kind]).then(check));
@@ -2837,163 +2932,324 @@
     }
   }
 
+  function isNetworkError(err) {
+    return /fetch|network|Load failed|NetworkError/i.test((err && (err.message || err.name)) || String(err));
+  }
+
   function cloudError(err) {
     var msg = (err && (err.message || err.error_description)) || String(err);
-    if (/fetch|network|Load failed/i.test(msg)) {
+    if (isNetworkError(err)) {
       setCloudStatus('error', 'Sin conexión: los cambios quedan guardados acá y se suben cuando vuelva internet.');
     } else if (err && err.code === '23505' && !cloud.retried) {
       // Otra sesión subió el mismo número justo ahora: se baja lo nuevo y se renumera lo propio.
       cloud.retried = true;
       setTimeout(function () { cloudRun(cloudPull).then(function () { cloud.retried = false; }); }, 300);
       setCloudStatus('syncing');
+    } else if (err && err.code === '42501') {
+      setCloudStatus('error', 'Tu cuenta no tiene permiso para guardar. Pedile al dueño que la apruebe.');
     } else if (err && (err.code === 'PGRST205' || err.code === '42P01' || err.code === 'PGRST202')) {
-      setCloudStatus('error', 'Falta crear la tabla en Supabase: corré el archivo supabase/schema.sql en el SQL Editor.');
+      setCloudStatus('error', 'Falta preparar la base: corré supabase/schema.sql en el SQL Editor de Supabase.');
     } else {
       setCloudStatus('error', 'No se pudo sincronizar: ' + msg);
     }
   }
 
-  var CLOUD_LABELS = { off: 'Sin conectar', login: 'Falta iniciar sesión', syncing: 'Sincronizando…', ok: 'Sincronizado', error: 'Pendiente de sincronizar' };
+  var CLOUD_LABELS = { off: 'Sin conexión', syncing: 'Sincronizando…', ok: 'Guardado en la nube', error: 'Pendiente de sincronizar' };
+  var ROLE_LABELS = { owner: 'Dueño', member: 'Aprobado', pending: 'Pendiente' };
+
+  function hhmm(ts) { return new Date(ts).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }); }
 
   function setCloudStatus(status, message) {
     cloud.status = status;
     cloud.message = message || '';
     $('cloud-dot').dataset.status = status;
-    $('b-cloud').title = 'Nube: ' + CLOUD_LABELS[status];
-    var note = $('storage-note');
-    if (status === 'off') note.textContent = 'Los datos se guardan en este navegador. Descargá una copia cada tanto, o conectá la nube.';
-    else if (status === 'login') note.textContent = 'Nube conectada, pero falta iniciar sesión. Mientras tanto se guarda solo en este navegador.';
-    else if (status === 'error') note.textContent = cloud.message;
-    else note.textContent = 'Guardado en la nube' + (cloud.user ? ' (' + cloud.user.email + ')' : '') + (cloud.lastSync ? ' · ' + new Date(cloud.lastSync).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '');
+    $('b-cloud').title = CLOUD_LABELS[status];
+    $('storage-note').textContent = status === 'error' || status === 'off' ? cloud.message || CLOUD_LABELS[status]
+      : CLOUD_LABELS[status] + (cloud.lastSync ? ' · ' + hhmm(cloud.lastSync) : '');
     if ($('dlg-cloud').open) renderCloudDialog();
   }
 
-  // La URL y la clave se cargan desde el diálogo y quedan solo en este navegador: no van en el código.
-  function cloudConfig() {
-    var cfg = load(CLOUD_CFG_KEY, null);
-    return cfg && cfg.url && cfg.key ? cfg : null;
+  function renderCloudDialog() {
+    var who = cloud.user || load(LAST_USER_KEY, {}) || {};
+    $('cloud-state').innerHTML =
+      '<div><b>Usuario:</b> ' + esc(who.email || '—') + (cloud.role ? ' <span class="role-badge role-' + cloud.role + '">' + ROLE_LABELS[cloud.role] + '</span>' : '') + '</div>' +
+      '<div><b>Estado:</b> ' + CLOUD_LABELS[cloud.status] + (cloud.lastSync ? ' · última vez ' + hhmm(cloud.lastSync) : '') + '</div>' +
+      (cloud.message ? '<div class="form-error" style="margin-top:6px">' + esc(cloud.message) + '</div>' : '');
+  }
+
+  // ---------- Inicio de sesión ----------
+  function showAuth(panel, opts) {
+    opts = opts || {};
+    document.body.classList.add('locked');
+    ['auth-loading', 'auth-forms', 'recovery-form', 'auth-pending', 'auth-offline'].forEach(function (id) { $(id).hidden = id !== panel; });
+    if (panel === 'auth-forms') setAuthTab(opts.tab || 'login');
+  }
+
+  function setAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(function (t) { t.classList.toggle('active', t.dataset.authTab === tab || (tab === 'forgot' && t.dataset.authTab === 'login')); });
+    $('login-form').hidden = tab !== 'login';
+    $('signup-form').hidden = tab !== 'signup';
+    $('forgot-form').hidden = tab !== 'forgot';
+    authMsg('');
+    var first = { login: 'li-email', signup: 'su-email', forgot: 'fg-email' }[tab];
+    setTimeout(function () { $(first).focus(); }, 0);
+  }
+
+  function authMsg(text, ok, id) {
+    var el = $(id || 'auth-msg');
+    el.textContent = text;
+    el.hidden = !text;
+    el.classList.toggle('ok', !!ok);
+  }
+
+  function authErrorText(err) {
+    var m = (err && err.message) || '';
+    if (/invalid login/i.test(m)) return 'Email o contraseña incorrectos.';
+    if (/not confirmed/i.test(m)) return 'Todavía no confirmaste tu email: buscá el mail de confirmación (fijate en spam) y tocá el link.';
+    if (/already registered|already exists/i.test(m)) return 'Ese email ya tiene cuenta. Iniciá sesión.';
+    if (/at least 6|password should be/i.test(m)) return 'La contraseña tiene que tener al menos 6 caracteres.';
+    if (/rate limit|security purposes|too many/i.test(m)) return 'Demasiados intentos seguidos. Esperá un minuto y probá de nuevo.';
+    if (/signups not allowed|signup.*disabled/i.test(m)) return 'Por ahora no se pueden crear cuentas nuevas. Pedile al dueño que te cree una.';
+    if (isNetworkError(err)) return 'No hay conexión con el servidor. Revisá internet y probá de nuevo.';
+    return 'No se pudo completar: ' + m;
+  }
+
+  function redirectUrl() { return /^https?:/.test(location.protocol) ? location.href.split('#')[0] : undefined; }
+
+  function unlock() {
+    document.body.classList.remove('locked');
+    $('menu-users').hidden = cloud.role !== 'owner';
+  }
+
+  function wipeLocal() {
+    state.clients = []; state.products = []; state.quotes = []; state.company = Object.assign({}, DEFAULT_COMPANY); state.seq = 0;
+    Object.keys(KEYS).forEach(function (k) { save(KEYS[k], state[k]); });
+    save(CLOUD_SNAP_KEY, null);
+  }
+
+  // Con sesión iniciada, el permiso sale de cotizador_members: pendiente o aprobado.
+  function checkMembership() {
+    var user = cloud.user;
+    return cloud.sb.from('cotizador_members').select('role').eq('user_id', user.id).maybeSingle().then(check).then(function (res) {
+      if (cloud.user !== user) return;
+      cloud.role = res.data ? res.data.role : 'pending';
+      save(LAST_USER_KEY, { id: user.id, email: user.email, role: cloud.role });
+      if (cloud.role === 'pending') {
+        $('auth-pending-text').textContent = 'Entraste como ' + user.email + '. Cuando el dueño apruebe tu cuenta desde Usuarios, vas a poder usar el cotizador.';
+        return showAuth('auth-pending');
+      }
+      unlock();
+      refreshPendingCount();
+      cloudRun(cloudPull);
+    }).catch(function (err) {
+      var last = load(LAST_USER_KEY, null);
+      if (isNetworkError(err) && last && last.id === user.id && last.role !== 'pending') {
+        // Sin internet pero ya había entrado antes desde acá: se usa la copia guardada.
+        cloud.role = last.role;
+        unlock();
+        setCloudStatus('error', 'Sin conexión: los cambios quedan guardados acá y se suben cuando vuelva internet.');
+      } else if (isNetworkError(err)) {
+        offlineScreen();
+      } else {
+        showAuth('auth-forms');
+        authMsg(err && (err.code === 'PGRST205' || err.code === '42P01') ? 'Falta preparar la base de datos (supabase/schema.sql).' : authErrorText(err));
+      }
+    });
+  }
+
+  function offlineScreen() {
+    var last = load(LAST_USER_KEY, null);
+    var canOffline = !!(last && last.role && last.role !== 'pending');
+    $('auth-offline-text').textContent = canOffline
+      ? 'No se pudo conectar con la nube. Podés seguir con lo guardado en este navegador; los cambios se suben cuando vuelva internet.'
+      : 'Para entrar la primera vez necesitás internet.';
+    $('auth-offline-btn').hidden = !canOffline;
+    showAuth('auth-offline');
   }
 
   function startCloud() {
-    var cfg = cloudConfig();
-    if (!cfg) { setCloudStatus('off'); return; }
-    if (!window.supabase) { setCloudStatus('error', 'No se pudo cargar Supabase (¿sin internet?). Los datos siguen guardados en este navegador.'); return; }
-    cloud.sb = window.supabase.createClient(cfg.url, cfg.key, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'cotizador-auth' } });
+    if (!window.supabase) return offlineScreen();
+    cloud.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'cotizador-auth' } });
     cloud.sb.auth.onAuthStateChange(function (event, session) {
-      var wasIn = !!cloud.user;
+      var prev = cloud.user;
       cloud.user = session ? session.user : null;
-      if (!cloud.user) { setCloudStatus('login'); return; }
-      // La bajada se hace después del evento: el cliente no permite otras llamadas adentro del callback.
-      if (!wasIn) setTimeout(function () { cloudRun(cloudPull); }, 0);
+      // Las llamadas a la base se hacen después del evento: el cliente no permite otras adentro del callback.
+      setTimeout(function () {
+        if (event === 'PASSWORD_RECOVERY') { showAuth('recovery-form'); return; }
+        if (!cloud.user) { cloud.role = null; showAuth('auth-forms'); return; }
+        if (!prev || prev.id !== cloud.user.id || event === 'SIGNED_IN' && !cloud.role) checkMembership();
+      }, 0);
     });
     cloud.sb.auth.getSession().then(function (res) {
-      if (!res.data.session) setCloudStatus('login');
+      if (!res.data.session && !cloud.user) showAuth('auth-forms');
     });
   }
 
-  function renderCloudDialog() {
-    var cfg = cloudConfig();
-    $('cloud-config-form').hidden = !!cfg;
-    $('cloud-login-form').hidden = !cfg || !!cloud.user;
-    $('cloud-on').hidden = !cloud.user;
-    if (cloud.user) {
-      $('cloud-state').innerHTML =
-        '<div><b>Conectado como</b> ' + esc(cloud.user.email) + '</div>' +
-        '<div><b>Proyecto:</b> <span class="mono">' + esc(cfg.url.replace(/^https?:\/\//, '')) + '</span></div>' +
-        '<div><b>Estado:</b> ' + CLOUD_LABELS[cloud.status] + (cloud.lastSync ? ' · última vez ' + new Date(cloud.lastSync).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '') + '</div>' +
-        (cloud.message ? '<div class="form-error" style="margin-top:6px">' + esc(cloud.message) + '</div>' : '');
-    }
+  document.querySelectorAll('[data-auth-tab]').forEach(function (el) {
+    el.addEventListener('click', function (e) { e.preventDefault(); setAuthTab(el.dataset.authTab); });
+  });
+
+  function busy(form, on) { form.querySelector('[type=submit]').disabled = on; }
+
+  $('login-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var form = this, email = $('li-email').value.trim(), pass = $('li-pass').value;
+    if (!email || !pass) return authMsg('Completá el email y la contraseña.');
+    busy(form, true);
+    authMsg('');
+    cloud.sb.auth.signInWithPassword({ email: email, password: pass }).then(function (res) {
+      busy(form, false);
+      if (res.error) return authMsg(authErrorText(res.error));
+      $('li-pass').value = '';
+      showAuth('auth-loading');
+    }, function (err) { busy(form, false); authMsg(authErrorText(err)); });
+  });
+
+  $('signup-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var form = this, email = $('su-email').value.trim(), pass = $('su-pass').value;
+    if (!/^\S+@\S+\.\S+$/.test(email)) return authMsg('Escribí un email válido.');
+    if (pass.length < 6) return authMsg('La contraseña tiene que tener al menos 6 caracteres.');
+    if (pass !== $('su-pass2').value) return authMsg('Las contraseñas no coinciden.');
+    busy(form, true);
+    authMsg('');
+    cloud.sb.auth.signUp({ email: email, password: pass, options: { emailRedirectTo: redirectUrl() } }).then(function (res) {
+      busy(form, false);
+      if (res.error) return authMsg(authErrorText(res.error));
+      $('su-pass').value = $('su-pass2').value = '';
+      if (res.data.session) return showAuth('auth-loading');
+      // Supabase no avisa si el email ya existía: devuelve el usuario sin identidades.
+      if (res.data.user && res.data.user.identities && !res.data.user.identities.length) {
+        return authMsg('Ese email ya tiene cuenta. Iniciá sesión.');
+      }
+      setAuthTab('login');
+      $('li-email').value = email;
+      authMsg('Listo. Te mandamos un email a ' + email + ' para confirmar la cuenta: tocá el link y después iniciá sesión acá.', true);
+    }, function (err) { busy(form, false); authMsg(authErrorText(err)); });
+  });
+
+  $('forgot-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var form = this, email = $('fg-email').value.trim();
+    if (!/^\S+@\S+\.\S+$/.test(email)) return authMsg('Escribí un email válido.');
+    busy(form, true);
+    cloud.sb.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl() }).then(function (res) {
+      busy(form, false);
+      if (res.error) return authMsg(authErrorText(res.error));
+      authMsg('Si ' + email + ' tiene cuenta, te llega un email con el link para elegir una contraseña nueva.', true);
+    }, function (err) { busy(form, false); authMsg(authErrorText(err)); });
+  });
+
+  $('recovery-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var form = this, pass = $('rc-pass').value;
+    if (pass.length < 6) return authMsg('La contraseña tiene que tener al menos 6 caracteres.', false, 'recovery-msg');
+    if (pass !== $('rc-pass2').value) return authMsg('Las contraseñas no coinciden.', false, 'recovery-msg');
+    busy(form, true);
+    cloud.sb.auth.updateUser({ password: pass }).then(function (res) {
+      busy(form, false);
+      if (res.error) return authMsg(authErrorText(res.error), false, 'recovery-msg');
+      $('rc-pass').value = $('rc-pass2').value = '';
+      history.replaceState(null, '', location.pathname + location.search);
+      toast('Contraseña actualizada');
+      showAuth('auth-loading');
+      checkMembership();
+    });
+  });
+
+  function logout() {
+    var done = function () {
+      return cloud.sb.auth.signOut().catch(function () {}).then(function () {
+        // Todo queda en la nube: se limpia la copia de este navegador.
+        wipeLocal();
+        save(LAST_USER_KEY, null);
+        location.reload();
+      });
+    };
+    if (!canSync()) return done();
+    cloudRun(cloudPush).then(function () {
+      if (cloud.status === 'error' && !confirm('Hay cambios que todavía no se subieron y se van a perder si cerrás sesión. ¿Cerrar igual?')) return;
+      return done();
+    });
   }
 
-  function showFormError(id, msg) {
-    $(id).textContent = msg;
-    $(id).hidden = !msg;
-  }
-
-  // Una clave JWT trae el rol adentro: si es service_role no se acepta.
-  function isSecretKey(key) {
-    if (/^sb_secret_/.test(key)) return true;
-    try { return JSON.parse(atob(key.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).role === 'service_role'; } catch (e) { return false; }
-  }
+  document.querySelectorAll('[data-auth]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var act = b.dataset.auth;
+      if (act === 'logout') logout();
+      if (act === 'reload') location.reload();
+      if (act === 'recheck') { showAuth('auth-loading'); checkMembership(); }
+      if (act === 'offline') {
+        var last = load(LAST_USER_KEY, null);
+        cloud.role = last.role;
+        unlock();
+        setCloudStatus('error', 'Sin conexión: los cambios quedan guardados acá. Cuando vuelva internet, recargá la página para sincronizar.');
+      }
+    });
+  });
 
   $('b-cloud').addEventListener('click', function () {
     setMenuOpen(false);
-    showFormError('cl-config-error', '');
-    showFormError('cl-login-error', '');
     renderCloudDialog();
     $('dlg-cloud').showModal();
-  });
-
-  $('cloud-config-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var url = $('cl-url').value.trim().replace(/\/+$/, '');
-    var key = $('cl-key').value.trim();
-    if (!/^https:\/\/[^\s/]+$/.test(url)) return showFormError('cl-config-error', 'La URL tiene que ser como https://xxxxxxxx.supabase.co');
-    if (isSecretKey(key)) return showFormError('cl-config-error', 'Esa es la clave secreta (service_role). Pegá la clave pública: anon o publishable.');
-    save(CLOUD_CFG_KEY, { url: url, key: key });
-    showFormError('cl-config-error', '');
-    startCloud();
-    renderCloudDialog();
-    $('cl-email').focus();
-  });
-
-  $('cloud-login-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    if (!cloud.sb) return showFormError('cl-login-error', 'No se pudo cargar Supabase. Revisá la conexión a internet y volvé a abrir la página.');
-    var btn = this.querySelector('[type=submit]');
-    btn.disabled = true;
-    showFormError('cl-login-error', '');
-    cloud.sb.auth.signInWithPassword({ email: $('cl-email').value.trim(), password: $('cl-pass').value }).then(function (res) {
-      btn.disabled = false;
-      if (res.error) {
-        var m = res.error.message || '';
-        return showFormError('cl-login-error', /invalid login/i.test(m) ? 'Email o contraseña incorrectos.' : /not confirmed/i.test(m) ? 'Ese usuario no está confirmado: en Supabase creálo con "Auto Confirm User".' : 'No se pudo entrar: ' + m);
-      }
-      $('cl-pass').value = '';
-      toast('Conectado: subiendo y bajando tus datos…');
-      renderCloudDialog();
-    });
   });
 
   $('dlg-cloud').addEventListener('click', function (e) {
     var b = e.target.closest('[data-cloud]');
     if (!b) return;
-    var act = b.dataset.cloud;
-    if (act === 'sync') cloudRun(cloudPull).then(function () { if (cloud.status === 'ok') toast('Todo sincronizado'); });
-    if (act === 'logout') {
-      cloudRun(cloudPush).then(function () {
-        if (cloud.status === 'error' && !confirm('Hay cambios que no se pudieron subir. Si cerrás sesión quedan solo en este navegador. ¿Seguir?')) return;
-        var wipe = confirm('¿Borrar también los datos de este navegador? Siguen guardados en la nube.\n\nAceptar: borrar de este navegador · Cancelar: dejarlos');
-        return cloud.sb.auth.signOut().then(function () {
-          if (wipe) {
-            state.clients = []; state.products = []; state.quotes = []; state.company = Object.assign({}, DEFAULT_COMPANY); state.seq = 0;
-            Object.keys(KEYS).forEach(function (k) { save(KEYS[k], state[k]); });
-            save(CLOUD_SNAP_KEY, null);
-            newDraft();
-            loadDraftIntoForm();
-            refreshAfterSync();
-          }
-          toast('Sesión cerrada');
-        });
-      });
-    }
-    if (act === 'reset') {
-      if (!confirm('¿Desconectar este proyecto de Supabase? Los datos de este navegador no se borran.')) return;
-      (cloud.sb ? cloud.sb.auth.signOut() : Promise.resolve()).catch(function () {}).then(function () {
-        save(CLOUD_CFG_KEY, null);
-        cloud.sb = null;
-        cloud.user = null;
-        setCloudStatus('off');
-        renderCloudDialog();
-      });
-    }
+    if (b.dataset.cloud === 'sync') cloudRun(cloudPull).then(function () { if (cloud.status === 'ok') toast('Todo sincronizado'); });
+    if (b.dataset.cloud === 'logout') logout();
+  });
+
+  // ---------- Usuarios (solo el dueño) ----------
+  function refreshPendingCount() {
+    if (cloud.role !== 'owner') return;
+    cloud.sb.from('cotizador_members').select('user_id', { count: 'exact', head: true }).eq('role', 'pending').then(function (res) {
+      var n = res.count || 0;
+      $('pending-count').hidden = !n;
+      $('pending-count').textContent = n;
+    });
+  }
+
+  function renderMembers() {
+    var tbody = $('members-list');
+    if (cloud.role !== 'owner' || !cloud.sb) { tbody.innerHTML = '<tr><td colspan="4" class="empty">Solo el dueño administra los usuarios.</td></tr>'; return; }
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">Cargando…</td></tr>';
+    cloud.sb.from('cotizador_members').select('user_id,email,role,created_at').order('created_at').then(check).then(function (res) {
+      tbody.innerHTML = res.data.map(function (m) {
+        var me = cloud.user && m.user_id === cloud.user.id;
+        var act = me || m.role === 'owner' ? '<span class="faint">' + (me ? 'Vos' : '') + '</span>'
+          : m.role === 'pending' ? '<button type="button" class="btn btn-primary btn-sm" data-member="member" data-id="' + m.user_id + '">Aprobar</button>'
+          : '<button type="button" class="btn btn-ghost btn-sm" data-member="pending" data-id="' + m.user_id + '">Quitar acceso</button>';
+        return '<tr><td>' + esc(m.email) + '</td><td><span class="role-badge role-' + m.role + '">' + ROLE_LABELS[m.role] + '</span></td>' +
+          '<td>' + fmtDate(m.created_at.slice(0, 10)) + '</td><td style="text-align:right">' + act + '</td></tr>';
+      }).join('');
+      refreshPendingCount();
+    }).catch(function (err) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty">' + esc(isNetworkError(err) ? 'Sin conexión.' : 'No se pudo cargar: ' + err.message) + '</td></tr>';
+    });
+  }
+
+  $('members-list').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-member]');
+    if (!b) return;
+    var role = b.dataset.member;
+    if (role === 'pending' && !confirm('¿Quitarle el acceso? No va a poder entrar hasta que lo vuelvas a aprobar.')) return;
+    b.disabled = true;
+    cloud.sb.from('cotizador_members').update({ role: role }).eq('user_id', b.dataset.id).then(check).then(function () {
+      toast(role === 'member' ? 'Usuario aprobado' : 'Acceso quitado');
+      renderMembers();
+    }).catch(function (err) { b.disabled = false; toast('No se pudo: ' + err.message); });
   });
 
   // Al volver a la pestaña o recuperar internet se trae lo que cambió en otros dispositivos.
   document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'visible' && cloud.user && Date.now() - cloud.lastPull > 30000) cloudRun(cloudPull);
+    if (document.visibilityState === 'visible' && canSync() && Date.now() - cloud.lastPull > 30000) {
+      cloudRun(cloudPull);
+      refreshPendingCount();
+    }
   });
-  window.addEventListener('online', function () { if (cloud.user) cloudRun(cloudPull); });
+  window.addEventListener('online', function () { if (canSync()) cloudRun(cloudPull); });
 
   // ---------- Inicio ----------
   expireQuotes();
