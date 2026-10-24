@@ -1344,7 +1344,7 @@
     </ol>
     <div class="grid">
       <div class="field span-2"><label for="cl-url">Project URL</label><input id="cl-url" value="https://iusgkfvlheqllevpxrbl.supabase.co" placeholder="https://xxxxxxxx.supabase.co" autocomplete="off" required></div>
-      <div class="field span-2"><label for="cl-key">Clave pública (anon o publishable)</label><input id="cl-key" value="sb_publishable_JC-tuVTFctdwg-pYFYT7Pg_TSCaeErb" placeholder="eyJhbGciOi… o sb_publishable_…" autocomplete="off" required></div>
+      <div class="field span-2"><label for="cl-key">Clave pública (anon o publishable)</label><input id="cl-key" placeholder="eyJhbGciOi… o sb_publishable_…" autocomplete="off" required></div>
     </div>
     <p class="faint">Nunca pegues la clave <b>service_role</b> ni la <b>secret</b>: esas dan acceso total.</p>
     <p class="form-error" id="cl-config-error" hidden></p>
@@ -2868,14 +2868,10 @@
     if ($('dlg-cloud').open) renderCloudDialog();
   }
 
-  // Proyecto de Vestí Tu Negocio. La clave publishable es pública por diseño: lo que protege los datos
-  // es el inicio de sesión y Row Level Security. Se puede cambiar desde "Cambiar proyecto".
-  var DEFAULT_CLOUD = { url: 'https://iusgkfvlheqllevpxrbl.supabase.co', key: 'sb_publishable_JC-tuVTFctdwg-pYFYT7Pg_TSCaeErb' };
-
+  // La URL y la clave se cargan desde el diálogo y quedan solo en este navegador: no van en el código.
   function cloudConfig() {
     var cfg = load(CLOUD_CFG_KEY, null);
-    if (cfg && cfg.disabled) return null;
-    return cfg || DEFAULT_CLOUD;
+    return cfg && cfg.url && cfg.key ? cfg : null;
   }
 
   function startCloud() {
@@ -2984,7 +2980,7 @@
     if (act === 'reset') {
       if (!confirm('¿Desconectar este proyecto de Supabase? Los datos de este navegador no se borran.')) return;
       (cloud.sb ? cloud.sb.auth.signOut() : Promise.resolve()).catch(function () {}).then(function () {
-        save(CLOUD_CFG_KEY, { disabled: true });
+        save(CLOUD_CFG_KEY, null);
         cloud.sb = null;
         cloud.user = null;
         setCloudStatus('off');
