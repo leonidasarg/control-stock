@@ -531,6 +531,35 @@
   .st-enviada { background: var(--accent-wash); color: var(--accent-strong); }
   .st-negociacion { background: var(--warn-wash); color: var(--warn); }
   .st-aceptada { background: var(--good-wash); color: var(--good); }
+  .st-sena, .st-produccion, .st-lista { background: var(--cyan-wash); color: var(--cyan); }
+  .st-entregada { background: var(--good); color: var(--surface); }
+
+  .status-box {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 18px;
+    background: var(--surface-sunken);
+  }
+  .status-now { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .status-now .badge { font-size: 14px; padding: 5px 12px; }
+  .status-group { margin-top: 10px; }
+  .status-group .k { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .steps { display: flex; flex-wrap: wrap; gap: 6px; }
+  .step {
+    font: inherit; font-size: 13px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 11px; border-radius: 999px;
+    border: 1px solid var(--border-strong); background: var(--surface); color: var(--ink-muted);
+    cursor: pointer;
+  }
+  .step:hover { border-color: var(--accent); color: var(--ink); }
+  .step.done { color: var(--ink); border-color: var(--border); }
+  .step.done::before { content: '✓'; color: var(--good); }
+  .step.current { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .step.lost { color: var(--bad); }
+  .step.lost.current { background: var(--bad); border-color: var(--bad); color: var(--surface); }
+  .status-dates { margin-top: 12px; }
   .st-rechazada { background: var(--bad-wash); color: var(--bad); }
   .st-vencida { background: var(--surface-sunken); color: var(--ink-faint); text-decoration: line-through; }
 
@@ -549,7 +578,7 @@
     gap: 12px;
   }
 
-  .totals .row span:last-child { font-family: var(--mono); }
+  .totals .row span:last-child { font-family: var(--mono); white-space: nowrap; }
 
   .totals .grand {
     font-family: var(--display);
@@ -561,6 +590,9 @@
   }
 
   .totals .grand span:last-child { font-family: var(--display); }
+  .totals .saving { color: var(--cyan); font-weight: 600; }
+  .totals .sub { font-size: 14px; color: var(--ink-muted); }
+  .was { color: var(--ink-faint); text-decoration: line-through; font-size: 12px; }
 
   .internal {
     margin-top: 18px;
@@ -624,7 +656,7 @@
 
   .stats {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 12px;
     margin-bottom: 20px;
   }
@@ -839,6 +871,8 @@
     .p-tot .grand span:first-child { font-family: var(--mono); font-size: 8pt; letter-spacing: 0.14em; text-transform: uppercase; color: #A30054; }
     .p-tot .grand span:last-child { font-family: var(--display); font-weight: 800; font-stretch: 112%; font-size: 17pt; letter-spacing: -0.015em; color: #D6006E; }
     .p-tot .sub { font-size: 9pt; }
+    .p-tot .saving { color: #0089C7; font-weight: 600; padding: 0 4mm 2.5mm; margin-top: -1mm; }
+    .p-was { font-weight: 400; font-size: 8.5pt; color: #928A9E; text-decoration: line-through; }
 
     .p-terms .p-kicker { margin-bottom: 2.5mm; }
     .p-terms ul { margin: 0; padding: 0; list-style: none; }
@@ -1019,13 +1053,18 @@
         <div class="toolbar">
           <input type="search" id="qs-search" placeholder="Buscar número o cliente…">
           <select id="qs-filter">
-            <option value="abiertas">Abiertas</option>
-            <option value="seguir">Para seguir hoy / atrasadas</option>
+            <option value="abiertas">En venta (abiertas)</option>
+            <option value="entregar">Vendidas, por entregar</option>
+            <option value="seguir">Para atender hoy / atrasadas</option>
             <option value="todas">Todas</option>
             <option value="borrador">Borrador</option>
             <option value="enviada">Enviada</option>
             <option value="negociacion">En negociación</option>
-            <option value="aceptada">Aceptada</option>
+            <option value="aceptada">Cerrada</option>
+            <option value="sena">Seña cobrada</option>
+            <option value="produccion">En producción</option>
+            <option value="lista">Lista para entregar</option>
+            <option value="entregada">Entregada</option>
             <option value="rechazada">Rechazada</option>
             <option value="vencida">Vencida</option>
           </select>
@@ -1038,7 +1077,7 @@
                 <th>Cliente</th>
                 <th class="num">Total</th>
                 <th>Estado</th>
-                <th>Seguimiento</th>
+                <th>Próximo paso</th>
               </tr>
             </thead>
             <tbody id="qs-list"></tbody>
@@ -1341,15 +1380,27 @@
   function persist(what) { save(KEYS[what], state[what]); }
 
   // ---------- Utilidades ----------
+  // 'aceptada' se muestra como "Cerrada": se mantiene la clave para no romper datos guardados.
   var STATUSES = {
     borrador: 'Borrador',
     enviada: 'Enviada',
     negociacion: 'En negociación',
-    aceptada: 'Aceptada',
+    aceptada: 'Cerrada',
+    sena: 'Seña cobrada',
+    produccion: 'En producción',
+    lista: 'Lista para entregar',
+    entregada: 'Entregada',
     rechazada: 'Rechazada',
     vencida: 'Vencida'
   };
   var OPEN = ['borrador', 'enviada', 'negociacion'];
+  var WON = ['aceptada', 'sena', 'produccion', 'lista', 'entregada'];
+  var TO_DELIVER = ['aceptada', 'sena', 'produccion', 'lista'];
+  var FLOW = [
+    { title: 'Venta', steps: ['borrador', 'enviada', 'negociacion', 'aceptada'] },
+    { title: 'Pedido', steps: ['sena', 'produccion', 'lista', 'entregada'] }
+  ];
+  var FLOW_ORDER = FLOW[0].steps.concat(FLOW[1].steps);
 
   // Formato del manual de marca: signo adelante y punto de miles ($12.500); decimales solo si hay.
   function fmt(n) {
@@ -1415,9 +1466,10 @@
   function quoteClient(q) { return clientById(q.clientId) || q.clientSnapshot || { name: '(cliente eliminado)' }; }
 
   function computeTotals(items, gdisc, iva) {
-    var gross = 0, cost = 0;
+    var gross = 0, cost = 0, list = 0;
     items.forEach(function (it) {
       var line = num(it.qty) * num(it.price) * (1 - num(it.disc) / 100);
+      list += num(it.qty) * num(it.price);
       gross += line;
       cost += num(it.qty) * num(it.cost);
     });
@@ -1426,6 +1478,9 @@
     var tax = net * num(iva) / 100;
     var profit = net - cost;
     return {
+      list: list,
+      lineDisc: list - gross,
+      totalDisc: list - net,
       gross: gross,
       discount: discount,
       net: net,
@@ -1438,6 +1493,35 @@
   }
 
   function lineTotal(it) { return num(it.qty) * num(it.price) * (1 - num(it.disc) / 100); }
+  function lineList(it) { return num(it.qty) * num(it.price); }
+
+  // Filas del resumen que ve el cliente (pantalla, PDF, WhatsApp y email): si hay descuento se muestra
+  // el precio de lista, cada descuento y cuánto se ahorra.
+  function totalRows(t, iva, gdisc, senaPct) {
+    var rows = [];
+    if (t.totalDisc > 0.004) {
+      rows.push({ label: 'Precio de lista', value: fmt(t.list) });
+      if (t.lineDisc > 0.004) rows.push({ label: 'Descuento por producto', value: '−' + fmt(t.lineDisc) });
+      if (num(gdisc) > 0) rows.push({ label: 'Descuento ' + pct(num(gdisc)), value: '−' + fmt(t.discount) });
+    } else {
+      rows.push({ label: 'Subtotal', value: fmt(t.gross) });
+    }
+    if (num(iva) > 0) {
+      rows.push({ label: 'Neto', value: fmt(t.net) });
+      rows.push({ label: 'IVA ' + pct(num(iva)), value: fmt(t.tax) });
+    }
+    rows.push({ label: 'Total', value: fmt(t.total), cls: 'grand' });
+    if (t.totalDisc > 0.004) rows.push({ label: 'Ahorrás', value: fmt(t.totalDisc) + ' (' + pct(t.totalDisc / t.list * 100) + ')', cls: 'saving' });
+    if (num(senaPct) > 0 && t.total > 0) {
+      rows.push({ label: 'Seña ' + pct(num(senaPct)), value: fmt(t.total * num(senaPct) / 100), cls: 'sub' });
+      rows.push({ label: 'Saldo al retirar', value: fmt(t.total * (1 - num(senaPct) / 100)), cls: 'sub' });
+    }
+    return rows;
+  }
+
+  function rowsHTML(rows) {
+    return rows.map(function (r) { return '<div class="row' + (r.cls ? ' ' + r.cls : '') + '"><span>' + r.label + '</span><span>' + r.value + '</span></div>'; }).join('');
+  }
 
   // Marca como vencidas las cotizaciones abiertas cuya validez ya pasó.
   function expireQuotes() {
@@ -1926,20 +2010,7 @@
   $('q-follow').addEventListener('input', function () { draft.followUp = $('q-follow').value; });
   $('q-notes').addEventListener('input', function () { draft.notes = $('q-notes').value; });
 
-  function totalsHTML(t, iva, gdisc, senaPct) {
-    var rows = '<div class="row"><span>Subtotal</span><span>' + fmt(t.gross) + '</span></div>';
-    if (num(gdisc) > 0) rows += '<div class="row"><span>Descuento ' + pct(num(gdisc)) + '</span><span>− ' + fmt(t.discount) + '</span></div>';
-    if (num(iva) > 0) {
-      rows += '<div class="row"><span>Neto</span><span>' + fmt(t.net) + '</span></div>';
-      rows += '<div class="row"><span>IVA ' + pct(num(iva)) + '</span><span>' + fmt(t.tax) + '</span></div>';
-    }
-    rows += '<div class="row grand"><span>Total</span><span>' + fmt(t.total) + '</span></div>';
-    if (num(senaPct) > 0 && t.total > 0) {
-      rows += '<div class="row"><span>Seña ' + pct(num(senaPct)) + '</span><span>' + fmt(t.total * num(senaPct) / 100) + '</span></div>';
-      rows += '<div class="row"><span>Saldo al retirar</span><span>' + fmt(t.total * (1 - num(senaPct) / 100)) + '</span></div>';
-    }
-    return rows;
-  }
+  function totalsHTML(t, iva, gdisc, senaPct) { return rowsHTML(totalRows(t, iva, gdisc, senaPct)); }
 
   function internalHTML(t) {
     return '<div class="row"><span>Costo total</span><span>' + fmt(t.cost) + '</span></div>' +
@@ -2021,12 +2092,28 @@
   // ---------- Cotizaciones ----------
   var selectedQuoteId = null;
 
-  function followClass(q) {
-    if (!q.followUp || OPEN.indexOf(q.status) === -1) return '';
-    var today = todayISO();
-    if (q.followUp < today) return 'due-late';
-    if (q.followUp === today) return 'due-today';
+  // Fecha que importa según la etapa: seguimiento mientras se vende, entrega una vez cerrada.
+  function nextDate(q) {
+    if (OPEN.indexOf(q.status) !== -1) return q.followUp || '';
+    if (TO_DELIVER.indexOf(q.status) !== -1) return q.deliveryDate || '';
     return '';
+  }
+
+  function followClass(q) {
+    var d = nextDate(q);
+    if (!d) return '';
+    var today = todayISO();
+    if (d < today) return 'due-late';
+    if (d === today) return 'due-today';
+    return '';
+  }
+
+  function nextStepText(q) {
+    var d = nextDate(q), late = followClass(q) === 'due-late' ? ' ⚠' : '';
+    if (OPEN.indexOf(q.status) !== -1) return d ? 'Seguir ' + fmtDate(d) + late : 'Sin fecha';
+    if (TO_DELIVER.indexOf(q.status) !== -1) return d ? 'Entregar ' + fmtDate(d) + late : 'Entrega sin fecha';
+    if (q.status === 'entregada') return q.deliveredAt ? 'Entregada ' + fmtDate(q.deliveredAt) : 'Entregada';
+    return '—';
   }
 
   function needsFollowUp(q) { return followClass(q) !== ''; }
@@ -2036,19 +2123,20 @@
     var b = $('due-count');
     b.hidden = !n;
     b.textContent = n;
-    b.title = n + ' para seguir hoy o atrasadas';
+    b.title = n + ' para atender hoy o atrasadas';
   }
 
   function renderStats() {
-    var open = state.quotes.filter(function (q) { return OPEN.indexOf(q.status) !== -1; });
-    var won = state.quotes.filter(function (q) { return q.status === 'aceptada'; });
-    var closed = state.quotes.filter(function (q) { return q.status === 'aceptada' || q.status === 'rechazada'; });
+    var by = function (arr) { return state.quotes.filter(function (q) { return arr.indexOf(q.status) !== -1; }); };
     var sum = function (arr) { return arr.reduce(function (s, q) { return s + q.total; }, 0); };
+    var open = by(OPEN), won = by(WON), toDeliver = by(TO_DELIVER), lost = by(['rechazada']);
+    var due = state.quotes.filter(needsFollowUp).length;
     $('stats').innerHTML =
-      '<div class="stat"><div class="k">Abiertas</div><div class="v">' + open.length + '</div><div class="faint">' + fmt(sum(open)) + '</div></div>' +
-      '<div class="stat"><div class="k">Para seguir</div><div class="v ' + (state.quotes.some(needsFollowUp) ? 'bad' : '') + '">' + state.quotes.filter(needsFollowUp).length + '</div><div class="faint">hoy o atrasadas</div></div>' +
-      '<div class="stat"><div class="k">Ganadas</div><div class="v good">' + won.length + '</div><div class="faint">' + fmt(sum(won)) + '</div></div>' +
-      '<div class="stat"><div class="k">Tasa de cierre</div><div class="v">' + (closed.length ? pct(won.length / closed.length * 100) : '—') + '</div><div class="faint">aceptadas / cerradas</div></div>';
+      '<div class="stat"><div class="k">En venta</div><div class="v">' + open.length + '</div><div class="faint">' + fmt(sum(open)) + '</div></div>' +
+      '<div class="stat"><div class="k">Para atender</div><div class="v ' + (due ? 'bad' : '') + '">' + due + '</div><div class="faint">hoy o atrasadas</div></div>' +
+      '<div class="stat"><div class="k">Por entregar</div><div class="v">' + toDeliver.length + '</div><div class="faint">' + fmt(sum(toDeliver)) + '</div></div>' +
+      '<div class="stat"><div class="k">Vendidas</div><div class="v good">' + won.length + '</div><div class="faint">' + fmt(sum(won)) + '</div></div>' +
+      '<div class="stat"><div class="k">Tasa de cierre</div><div class="v">' + (won.length + lost.length ? pct(won.length / (won.length + lost.length) * 100) : '—') + '</div><div class="faint">vendidas / decididas</div></div>';
   }
 
   function renderQuotes() {
@@ -2059,6 +2147,7 @@
     var filter = $('qs-filter').value;
     var list = state.quotes.filter(function (x) {
       if (filter === 'abiertas' && OPEN.indexOf(x.status) === -1) return false;
+      if (filter === 'entregar' && TO_DELIVER.indexOf(x.status) === -1) return false;
       if (filter === 'seguir' && !needsFollowUp(x)) return false;
       if (STATUSES[filter] && x.status !== filter) return false;
       if (q && norm(quoteNumber(x.number) + ' ' + quoteClient(x).name).indexOf(q) === -1) return false;
@@ -2072,7 +2161,7 @@
         '<td>' + esc(quoteClient(x).name) + '</td>' +
         '<td class="num">' + fmt(x.total) + '</td>' +
         '<td><span class="badge st-' + x.status + '">' + STATUSES[x.status] + '</span></td>' +
-        '<td class="' + fc + '">' + (OPEN.indexOf(x.status) !== -1 ? fmtDate(x.followUp) + (fc === 'due-late' ? ' ⚠' : '') : '—') + '</td></tr>';
+        '<td class="' + fc + '">' + nextStepText(x) + '</td></tr>';
     }).join('') : '<tr><td colspan="5" class="empty">' + (state.quotes.length ? 'No hay cotizaciones con este filtro.' : 'Todavía no guardaste cotizaciones.') + '</td></tr>';
 
     renderQuoteDetail();
@@ -2089,6 +2178,50 @@
     if (window.innerWidth < 900) $('quote-detail').scrollIntoView({ behavior: 'smooth' });
   });
 
+  function statusBoxHTML(q, isOpen) {
+    var pos = FLOW_ORDER.indexOf(q.status);
+    var groups = FLOW.map(function (g) {
+      return '<div class="status-group"><div class="k">' + g.title + '</div><div class="steps">' +
+        g.steps.map(function (k) {
+          var i = FLOW_ORDER.indexOf(k);
+          var cls = k === q.status ? ' current' : (pos !== -1 && i < pos ? ' done' : '');
+          return '<button type="button" class="step' + cls + '" data-status="' + k + '">' + STATUSES[k] + '</button>';
+        }).join('') + '</div></div>';
+    }).join('');
+    var other = '<div class="status-group"><div class="k">No se concretó</div><div class="steps">' +
+      ['rechazada', 'vencida'].map(function (k) {
+        return '<button type="button" class="step lost' + (k === q.status ? ' current' : '') + '" data-status="' + k + '">' + STATUSES[k] + '</button>';
+      }).join('') + '</div></div>';
+    var dateField = '';
+    if (isOpen) {
+      dateField = '<div class="field status-dates"><label for="d-follow">Próximo seguimiento</label><input type="date" id="d-follow" value="' + esc(q.followUp || '') + '"></div>';
+    } else if (TO_DELIVER.indexOf(q.status) !== -1) {
+      dateField = '<div class="field status-dates"><label for="d-delivery">Entrega prevista</label><input type="date" id="d-delivery" value="' + esc(q.deliveryDate || '') + '"></div>';
+    } else if (q.status === 'entregada' && q.deliveredAt) {
+      dateField = '<p class="faint status-dates" style="margin-bottom:0">Entregada el ' + fmtDate(q.deliveredAt) + '.</p>';
+    }
+    return '<div class="status-box"><div class="status-now"><div><div class="k" style="font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint)">Estado</div></div>' +
+      '<span class="badge st-' + q.status + '">' + STATUSES[q.status] + '</span></div>' +
+      groups + other + dateField + '</div>';
+  }
+
+  function setStatus(q, status) {
+    if (status === q.status) return;
+    var prev = q.status;
+    q.status = status;
+    var text = 'Estado: ' + STATUSES[prev] + ' → ' + STATUSES[status] + '.';
+    if (TO_DELIVER.indexOf(status) !== -1 && !q.deliveryDate) {
+      // Plazo del sitio: 5 a 7 días hábiles, unos 9 días corridos.
+      q.deliveryDate = addDays(todayISO(), 9);
+      text += ' Entrega prevista: ' + fmtDate(q.deliveryDate) + '.';
+    }
+    if (status === 'entregada') q.deliveredAt = todayISO();
+    q.log.push({ ts: Date.now(), text: text });
+    persist('quotes');
+    renderQuotes();
+    toast(quoteNumber(q.number) + ': ' + STATUSES[status]);
+  }
+
   function renderQuoteDetail() {
     var box = $('quote-detail');
     var q = state.quotes.find(function (x) { return x.id === selectedQuoteId; });
@@ -2099,15 +2232,9 @@
 
     box.innerHTML =
       '<div class="card-head"><div><h2>' + quoteNumber(q.number) + ' · ' + esc(c.name) + '</h2>' +
-      '<p class="hint">Creada el ' + fmtDate(q.date) + ' · válida hasta el ' + fmtDate(q.validUntil) + '</p></div>' +
-      '<span class="badge st-' + q.status + '">' + STATUSES[q.status] + '</span></div>' +
+      '<p class="hint">Creada el ' + fmtDate(q.date) + ' · válida hasta el ' + fmtDate(q.validUntil) + '</p></div></div>' +
 
-      '<div class="grid" style="margin-bottom:16px">' +
-        '<div class="field"><label for="d-status">Estado</label><select id="d-status">' +
-          Object.keys(STATUSES).map(function (k) { return '<option value="' + k + '"' + (k === q.status ? ' selected' : '') + '>' + STATUSES[k] + '</option>'; }).join('') +
-        '</select></div>' +
-        '<div class="field"><label for="d-follow">Próximo seguimiento</label><input type="date" id="d-follow" value="' + esc(q.followUp || '') + '"' + (isOpen ? '' : ' disabled') + '></div>' +
-      '</div>' +
+      statusBoxHTML(q, isOpen) +
 
       '<div class="detail-meta">' +
         (c.contact ? '<div><b>Contacto:</b> ' + esc(c.contact) + '</div>' : '') +
@@ -2120,7 +2247,7 @@
         q.items.map(function (it) {
           return '<tr><td>' + esc(it.name) + (it.disc ? ' <span class="faint">(−' + pct(it.disc) + ')</span>' : '') +
             (it.detail ? '<div class="faint detail">' + esc(it.detail) + '</div>' : '') + '</td>' +
-            '<td class="num">' + it.qty.toLocaleString('es-AR') + '</td><td class="num">' + fmt(it.price) + '</td><td class="num">' + fmt(lineTotal(it)) + '</td></tr>';
+            '<td class="num">' + it.qty.toLocaleString('es-AR') + '</td><td class="num">' + fmt(it.price) + '</td><td class="num">' + (it.disc ? '<div class="was">' + fmt(lineList(it)) + '</div>' : '') + fmt(lineTotal(it)) + '</td></tr>';
         }).join('') +
       '</tbody></table></div>' +
 
@@ -2149,18 +2276,23 @@
         return '<li><div class="when">' + fmtDateTime(l.ts) + '</div><div class="what">' + esc(l.text) + '</div></li>';
       }).join('') + '</ul>';
 
-    $('d-status').addEventListener('change', function () {
-      var prev = q.status;
-      q.status = this.value;
-      q.log.push({ ts: Date.now(), text: 'Estado: ' + STATUSES[prev] + ' → ' + STATUSES[q.status] + '.' });
+    box.querySelector('.status-box').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-status]');
+      if (b) setStatus(q, b.dataset.status);
+    });
+
+    var follow = $('d-follow');
+    if (follow) follow.addEventListener('change', function () {
+      q.followUp = follow.value;
+      q.log.push({ ts: Date.now(), text: follow.value ? 'Próximo seguimiento: ' + fmtDate(follow.value) + '.' : 'Se quitó la fecha de seguimiento.' });
       persist('quotes');
       renderQuotes();
     });
 
-    var follow = $('d-follow');
-    follow.addEventListener('change', function () {
-      q.followUp = follow.value;
-      q.log.push({ ts: Date.now(), text: follow.value ? 'Próximo seguimiento: ' + fmtDate(follow.value) + '.' : 'Se quitó la fecha de seguimiento.' });
+    var delivery = $('d-delivery');
+    if (delivery) delivery.addEventListener('change', function () {
+      q.deliveryDate = delivery.value;
+      q.log.push({ ts: Date.now(), text: delivery.value ? 'Entrega prevista: ' + fmtDate(delivery.value) + '.' : 'Se quitó la fecha de entrega.' });
       persist('quotes');
       renderQuotes();
     });
@@ -2220,20 +2352,30 @@
     if (!draft.clientId) toast('El cliente original fue eliminado: elegí uno');
   }
 
-  function quoteText(q) {
+  // plain: sin formato de WhatsApp (*negrita*, ~tachado~), para el email.
+  function quoteText(q, plain) {
     var c = quoteClient(q);
     var co = state.company;
+    var B = plain ? '' : '*';
     var who = (c.contact || c.name).split(' ')[0];
-    var lines = ['Hola ' + who + '! Te paso la cotización *' + quoteNumber(q.number) + '*' + (co.name ? ' de ' + co.name : '') + '.', ''];
+    var lines = ['Hola ' + who + '! Te paso la cotización ' + B + quoteNumber(q.number) + B + (co.name ? ' de ' + co.name : '') + '.', ''];
     q.items.forEach(function (it) {
-      lines.push('• ' + it.qty.toLocaleString('es-AR') + ' ' + (it.unit || '') + ' – ' + it.name + ': ' + fmt(lineTotal(it)));
+      var price = fmt(lineTotal(it));
+      if (it.disc) {
+        price = plain
+          ? price + ' (antes ' + fmt(lineList(it)) + ', ' + pct(it.disc) + ' de descuento)'
+          : '~' + fmt(lineList(it)) + '~ ' + price + ' (' + pct(it.disc) + ' de descuento)';
+      }
+      lines.push('• ' + it.qty.toLocaleString('es-AR') + ' ' + (it.unit || '') + ' – ' + it.name + ': ' + price);
       if (it.detail) lines.push('   ' + it.detail);
     });
     var t = computeTotals(q.items, q.gdisc, q.iva);
     lines.push('');
-    if (q.gdisc) lines.push('Descuento ' + pct(q.gdisc) + ': −' + fmt(t.discount));
-    if (q.iva) lines.push('IVA ' + pct(q.iva) + ': ' + fmt(t.tax));
-    lines.push('*Total: ' + fmt(t.total) + '*');
+    totalRows(t, q.iva, q.gdisc, 0).forEach(function (r) {
+      if (r.cls === 'grand') lines.push(B + 'Total: ' + r.value + B);
+      else if (r.cls === 'saving') lines.push('Te ahorrás ' + r.value + ' con este presupuesto.');
+      else lines.push(r.label + ': ' + r.value);
+    });
     if (q.senaPct > 0) lines.push('Seña para arrancar (' + pct(q.senaPct) + '): ' + fmt(t.total * q.senaPct / 100));
     lines.push('Precios válidos hasta el ' + fmtDate(q.validUntil) + '.');
     if (q.notes) { lines.push(''); lines.push(q.notes); }
@@ -2259,7 +2401,7 @@
   function sendEmail(q) {
     var c = quoteClient(q);
     var subject = 'Cotización ' + quoteNumber(q.number) + (state.company.name ? ' – ' + state.company.name : '');
-    window.location.href = 'mailto:' + encodeURIComponent(c.email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(quoteText(q).replace(/\*/g, ''));
+    window.location.href = 'mailto:' + encodeURIComponent(c.email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(quoteText(q, true));
     markSent(q, 'email');
   }
 
@@ -2270,16 +2412,7 @@
     var hasDisc = q.items.some(function (it) { return it.disc; });
     var isBrand = norm(co.name) === norm(DEFAULT_COMPANY.name);
     function lines(arr) { return arr.filter(Boolean).map(function (l) { return esc(l); }).join('<br>'); }
-    function row(label, value, cls) { return '<div class="row' + (cls ? ' ' + cls : '') + '"><span>' + label + '</span><span>' + value + '</span></div>'; }
-
-    var tot = row('Subtotal', fmt(t.gross));
-    if (q.gdisc > 0) tot += row('Descuento ' + pct(q.gdisc), '−' + fmt(t.discount));
-    if (q.iva > 0) tot += row('Neto', fmt(t.net)) + row('IVA ' + pct(q.iva), fmt(t.tax));
-    tot += row('Total', fmt(t.total), 'grand');
-    if (q.senaPct > 0 && t.total > 0) {
-      tot += row('Seña ' + pct(q.senaPct), fmt(t.total * q.senaPct / 100), 'sub');
-      tot += row('Saldo al retirar', fmt(t.total * (1 - q.senaPct / 100)), 'sub');
-    }
+    var tot = rowsHTML(totalRows(t, q.iva, q.gdisc, q.senaPct));
 
     var terms = (q.notes || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
     var contact = [co.phone && 'WhatsApp ' + co.phone, co.email, co.instagram, co.web].filter(Boolean).join('  ·  ');
@@ -2307,7 +2440,7 @@
             '<td class="r">' + it.qty.toLocaleString('es-AR') + ' ' + esc(it.unit || '') + '</td>' +
             '<td class="r">' + fmt(it.price) + '</td>' +
             (hasDisc ? '<td class="r">' + (it.disc ? pct(it.disc) : '—') + '</td>' : '') +
-            '<td class="r amount">' + fmt(lineTotal(it)) + '</td></tr>';
+            '<td class="r amount">' + (it.disc ? '<div class="p-was">' + fmt(lineList(it)) + '</div>' : '') + fmt(lineTotal(it)) + '</td></tr>';
         }).join('') +
       '</tbody></table>' +
       '<div class="p-bottom">' +
