@@ -16,3 +16,16 @@ A la izquierda tenés el menú con las cuatro secciones (en el celular se abre c
 - **Cotizaciones**: todas las que guardaste, numeradas (COT-0001, COT-0002…), con una sección de **estado** de un toque: venta (Borrador, Enviada, En negociación, Cerrada), pedido (Seña cobrada, En producción, Lista para entregar, Entregada) o no concretada (Rechazada, Vencida). Mientras se vende tiene fecha de próximo seguimiento; al cerrarla, fecha de entrega prevista. Lleva un historial donde anotás cada llamado o novedad. En el menú, "Cotizaciones" muestra un aviso rojo con las que tenés que seguir hoy o están atrasadas. Desde el detalle podés imprimir o guardar en PDF (A4, con márgenes propios y el nombre del archivo armado con el número y el cliente), mandarla por WhatsApp o email (siempre con el precio de lista, el descuento y cuánto ahorra el cliente), editarla o duplicarla.
 
 Las cotizaciones abiertas pasan solas a "Vencida" cuando se termina su validez. Los datos quedan en el navegador; usá **Descargar copia** (en Ajustes, dentro del menú) cada tanto para no perderlos, y **Restaurar copia** para pasarlos a otra PC. En **Datos de mi empresa** cargás lo que sale en el encabezado de la cotización impresa y en el mensaje de WhatsApp: CUIT, WhatsApp, email, Instagram, web, el porcentaje de seña y las condiciones por defecto.
+
+## Guardar en la nube (Supabase)
+
+Por defecto todo se guarda en el navegador. Si conectás Supabase, además queda guardado en tu proyecto y lo ves igual desde cualquier compu o celular. El cotizador sigue andando sin internet: los cambios se suben solos cuando vuelve la conexión.
+
+1. En tu proyecto de Supabase, abrí **SQL Editor → New query**, pegá el contenido de [`supabase/schema.sql`](supabase/schema.sql) y tocá **Run**. Crea la tabla `cotizador_items` con Row Level Security: cada usuario ve y edita solo lo suyo.
+2. En **Authentication → Users → Add user** creá tu usuario con email y contraseña, con **Auto Confirm User** tildado. Si no querés que nadie más se registre, en **Authentication → Sign In / Providers** desactivá **Allow new users to sign up**.
+3. En **Project Settings → API** copiá la clave pública (**anon** o **publishable**). Nunca uses la **service_role** ni la **secret**.
+4. En el cotizador tocá **Nube** (menú, en Ajustes), pegá la clave (la URL del proyecto ya viene cargada) y entrá con tu usuario. La clave se guarda solo en ese navegador, no en el código. La primera vez sube todo lo que ya tenías en ese navegador.
+
+**Números de cotización sin repetir.** Con la nube conectada, el número lo reparte Supabase con un contador que se bloquea mientras se incrementa: el primero que empieza una cotización (al elegir el cliente o el primer producto) se lleva el siguiente número, aunque haya otra sesión abierta al mismo tiempo. Si descartás la cotización, el número se devuelve, siempre que siga siendo el último. Además, la base rechaza dos cotizaciones con el mismo número. Si guardás sin conexión, queda como *COT-pendiente* (no se puede imprimir ni mandar) y recibe su número apenas vuelve internet.
+
+En cada compu o celular nuevo repetís el paso 4 y se baja todo. El puntito al lado de **Nube** muestra el estado: verde sincronizado, celeste sincronizando, naranja pendiente (sin conexión) y magenta falta iniciar sesión.
