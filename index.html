@@ -207,6 +207,27 @@
 
   .main { min-width: 0; }
 
+  .cloud-dot {
+    margin-left: auto;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    flex: none;
+  }
+  .cloud-dot[data-status="ok"] { background: var(--good); }
+  .cloud-dot[data-status="syncing"] { background: var(--cyan); animation: pulse 1s ease-in-out infinite; }
+  .cloud-dot[data-status="error"] { background: var(--warn); }
+  .cloud-dot[data-status="login"] { background: var(--accent); }
+  @keyframes pulse { 50% { opacity: 0.35; } }
+  @media (prefers-reduced-motion: reduce) { .cloud-dot[data-status="syncing"] { animation: none; } }
+
+  .steps-help { margin: 0 0 16px; padding-left: 20px; color: var(--ink-muted); font-size: 14px; line-height: 1.55; }
+  .steps-help li { margin-bottom: 4px; }
+  .steps-help code { font-family: var(--mono); font-size: 12.5px; background: var(--surface-sunken); padding: 1px 5px; border-radius: 4px; }
+  .form-error { color: var(--bad); font-size: 14px; margin: 10px 0 0; }
+  .cloud-state { padding: 14px; border-radius: 10px; background: var(--surface-sunken); font-size: 14px; line-height: 1.6; }
+
   .page {
     max-width: 1180px;
     margin: 0 auto;
@@ -913,10 +934,11 @@
         <button type="button" class="menu-item small" id="b-export"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Descargar copia</button>
         <label class="menu-item small" for="b-import"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></svg>Restaurar copia</label>
         <input type="file" id="b-import" accept="application/json,.json" hidden>
+        <button type="button" class="menu-item small" id="b-cloud"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10.5a4 4 0 0 0 .6-7.96A6 6 0 0 0 6.4 9.1 4.5 4.5 0 0 0 7 18Z"/></svg>Nube <span class="cloud-dot" id="cloud-dot" data-status="off"></span></button>
       </nav>
     </div>
 
-    <div class="sidebar-foot">Los datos se guardan en este navegador. Descargá una copia cada tanto.</div>
+    <div class="sidebar-foot" id="storage-note">Los datos se guardan en este navegador. Descargá una copia cada tanto.</div>
   </aside>
   <div class="scrim" id="scrim"></div>
 
@@ -1309,9 +1331,57 @@
   </form>
 </dialog>
 
+<dialog id="dlg-cloud">
+  <h2>Guardar en la nube</h2>
+
+  <form method="dialog" id="cloud-config-form" hidden>
+    <p class="muted" style="margin-top:0">Conectá tu proyecto de Supabase y todo queda guardado en la nube: lo ves igual desde la compu, el celular o cualquier navegador.</p>
+    <ol class="steps-help">
+      <li>Creá un proyecto gratis en <b>supabase.com</b>.</li>
+      <li>En <b>SQL Editor</b> pegá el contenido del archivo <code>supabase/schema.sql</code> y tocá <b>Run</b>.</li>
+      <li>En <b>Authentication → Users → Add user</b> creá tu usuario con email y contraseña, con <b>Auto Confirm User</b> tildado.</li>
+      <li>En <b>Project Settings → API</b> copiá la <b>Project URL</b> y la clave pública (<b>anon</b> o <b>publishable</b>) y pegalas acá abajo.</li>
+    </ol>
+    <div class="grid">
+      <div class="field span-2"><label for="cl-url">Project URL</label><input id="cl-url" value="https://iusgkfvlheqllevpxrbl.supabase.co" placeholder="https://xxxxxxxx.supabase.co" autocomplete="off" required></div>
+      <div class="field span-2"><label for="cl-key">Clave pública (anon o publishable)</label><input id="cl-key" placeholder="eyJhbGciOi… o sb_publishable_…" autocomplete="off" required></div>
+    </div>
+    <p class="faint">Nunca pegues la clave <b>service_role</b> ni la <b>secret</b>: esas dan acceso total.</p>
+    <p class="form-error" id="cl-config-error" hidden></p>
+    <div class="actions">
+      <button type="submit" class="btn btn-primary">Guardar y seguir</button>
+      <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+    </div>
+  </form>
+
+  <form method="dialog" id="cloud-login-form" hidden>
+    <p class="muted" style="margin-top:0">Entrá con el usuario que creaste en Supabase.</p>
+    <div class="grid">
+      <div class="field span-2"><label for="cl-email">Email</label><input id="cl-email" type="email" autocomplete="username" required></div>
+      <div class="field span-2"><label for="cl-pass">Contraseña</label><input id="cl-pass" type="password" autocomplete="current-password" required></div>
+    </div>
+    <p class="form-error" id="cl-login-error" hidden></p>
+    <div class="actions">
+      <button type="submit" class="btn btn-primary">Entrar</button>
+      <button type="button" class="btn btn-ghost" data-close>Cerrar</button>
+      <button type="button" class="btn btn-ghost" data-cloud="reset" style="margin-left:auto">Cambiar proyecto</button>
+    </div>
+  </form>
+
+  <div id="cloud-on" hidden>
+    <div class="cloud-state" id="cloud-state"></div>
+    <div class="actions">
+      <button type="button" class="btn btn-primary" data-cloud="sync">Sincronizar ahora</button>
+      <button type="button" class="btn btn-ghost" data-close>Cerrar</button>
+      <button type="button" class="btn btn-danger" data-cloud="logout" style="margin-left:auto">Cerrar sesión</button>
+    </div>
+  </div>
+</dialog>
+
 <div class="toast" id="toast"></div>
 <div id="print-area"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1377,7 +1447,10 @@
     seq: load(KEYS.seq, 0)
   };
 
-  function persist(what) { save(KEYS[what], state[what]); }
+  function persist(what) {
+    save(KEYS[what], state[what]);
+    schedulePush();
+  }
 
   // ---------- Utilidades ----------
   // 'aceptada' se muestra como "Cerrada": se mantiene la clave para no romper datos guardados.
@@ -2533,6 +2606,291 @@
     reader.readAsText(file);
   });
 
+  // ---------- Nube (Supabase) ----------
+  // Los datos siguen viviendo en el navegador (anda sin internet) y, si conectás Supabase, se copian
+  // a tu proyecto: cada cambio se sube y al abrir la app o volver a la pestaña se baja lo de otros
+  // dispositivos. Para saber qué cambió se guarda una foto de lo último que quedó en la nube.
+  var CLOUD_CFG_KEY = 'cotizador_nube_config_v1';
+  var CLOUD_SNAP_KEY = 'cotizador_nube_foto_v1';
+  var CLOUD_TABLE = 'cotizador_items';
+  var CLOUD_KINDS = ['clients', 'products', 'quotes'];
+  var cloud = { sb: null, user: null, status: 'off', message: '', lastSync: 0, lastPull: 0, timer: null, queue: Promise.resolve() };
+
+  function emptyMaps() { return { clients: {}, products: {}, quotes: {}, settings: {} }; }
+
+  function cloudSnapshot() {
+    var snap = load(CLOUD_SNAP_KEY, null);
+    return snap && cloud.user && snap.userId === cloud.user.id ? snap.maps : emptyMaps();
+  }
+
+  function saveSnapshot(maps) { save(CLOUD_SNAP_KEY, { userId: cloud.user.id, maps: maps }); }
+
+  // Cada registro se compara como texto JSON.
+  function localMaps() {
+    var m = emptyMaps();
+    CLOUD_KINDS.forEach(function (k) {
+      state[k].forEach(function (r) { m[k][r.id] = JSON.stringify(r); });
+    });
+    m.settings = { company: JSON.stringify(state.company), seq: JSON.stringify(state.seq) };
+    return m;
+  }
+
+  function check(res) {
+    if (res.error) throw res.error;
+    return res;
+  }
+
+  // Las operaciones van de a una para que una bajada no se cruce con una subida.
+  function cloudRun(fn) {
+    cloud.queue = cloud.queue.then(function () { return cloud.user ? fn() : null; }).catch(cloudError);
+    return cloud.queue;
+  }
+
+  function schedulePush() {
+    if (!cloud.user) return;
+    clearTimeout(cloud.timer);
+    cloud.timer = setTimeout(function () { cloudRun(cloudPush); }, 800);
+  }
+
+  function cloudPush() {
+    var snap = cloudSnapshot(), cur = localMaps(), upserts = [], deletes = {};
+    var now = new Date().toISOString();
+    Object.keys(cur).forEach(function (kind) {
+      Object.keys(cur[kind]).forEach(function (id) {
+        if (snap[kind][id] !== cur[kind][id]) {
+          upserts.push({ user_id: cloud.user.id, kind: kind, id: id, data: JSON.parse(cur[kind][id]), updated_at: now });
+        }
+      });
+      Object.keys(snap[kind]).forEach(function (id) {
+        if (!(id in cur[kind])) (deletes[kind] = deletes[kind] || []).push(id);
+      });
+    });
+    if (!upserts.length && !Object.keys(deletes).length) { setCloudStatus('ok'); return null; }
+
+    setCloudStatus('syncing');
+    var ops = [];
+    for (var i = 0; i < upserts.length; i += 500) {
+      ops.push(cloud.sb.from(CLOUD_TABLE).upsert(upserts.slice(i, i + 500), { onConflict: 'user_id,kind,id' }).then(check));
+    }
+    Object.keys(deletes).forEach(function (kind) {
+      ops.push(cloud.sb.from(CLOUD_TABLE).delete().eq('kind', kind).in('id', deletes[kind]).then(check));
+    });
+    return Promise.all(ops).then(function () {
+      // Se anota como subido exactamente lo que se mandó; lo que cambió mientras tanto sale en la próxima.
+      var s = cloudSnapshot();
+      upserts.forEach(function (u) { s[u.kind][u.id] = cur[u.kind][u.id]; });
+      Object.keys(deletes).forEach(function (kind) { deletes[kind].forEach(function (id) { delete s[kind][id]; }); });
+      saveSnapshot(s);
+      cloud.lastSync = Date.now();
+      setCloudStatus('ok');
+    });
+  }
+
+  function fetchAllRows() {
+    var rows = [], size = 1000;
+    function page(from) {
+      return cloud.sb.from(CLOUD_TABLE).select('kind,id,data').order('kind').order('id').range(from, from + size - 1).then(check).then(function (res) {
+        rows = rows.concat(res.data || []);
+        return res.data && res.data.length === size ? page(from + size) : rows;
+      });
+    }
+    return page(0);
+  }
+
+  function cloudPull() {
+    setCloudStatus('syncing');
+    return fetchAllRows().then(function (rows) {
+      var remote = emptyMaps();
+      rows.forEach(function (r) { if (remote[r.kind]) remote[r.kind][r.id] = JSON.stringify(r.data); });
+      var snap = cloudSnapshot(), cur = localMaps();
+
+      CLOUD_KINDS.forEach(function (kind) {
+        var merged = Object.assign({}, remote[kind]);
+        // Cambios hechos acá que todavía no se subieron (incluye lo nuevo): ganan sobre la nube.
+        Object.keys(cur[kind]).forEach(function (id) {
+          if (snap[kind][id] !== cur[kind][id]) merged[id] = cur[kind][id];
+        });
+        // Borrado acá y sin cambios en la nube desde entonces: sigue borrado.
+        Object.keys(snap[kind]).forEach(function (id) {
+          if (!(id in cur[kind]) && remote[kind][id] === snap[kind][id]) delete merged[id];
+        });
+        state[kind] = Object.keys(merged).map(function (id) { return JSON.parse(merged[id]); });
+      });
+
+      if (remote.settings.company && snap.settings.company === cur.settings.company) {
+        state.company = Object.assign({}, DEFAULT_COMPANY, JSON.parse(remote.settings.company));
+      }
+      var maxNumber = state.quotes.reduce(function (m, q) { return Math.max(m, q.number || 0); }, 0);
+      state.seq = Math.max(state.seq, remote.settings.seq ? JSON.parse(remote.settings.seq) : 0, maxNumber);
+
+      Object.keys(KEYS).forEach(function (k) { save(KEYS[k], state[k]); });
+      saveSnapshot(remote);
+      cloud.lastPull = cloud.lastSync = Date.now();
+      refreshAfterSync();
+      return cloudPush();
+    });
+  }
+
+  function refreshAfterSync() {
+    updateDueBadge();
+    if (currentView === 'nueva') {
+      if (draft.clientId && !clientById(draft.clientId)) draft.clientId = null;
+      renderDraftClient();
+      renderDraftItems();
+    } else {
+      showView(currentView);
+    }
+  }
+
+  function cloudError(err) {
+    var msg = (err && (err.message || err.error_description)) || String(err);
+    if (/fetch|network|Load failed/i.test(msg)) {
+      setCloudStatus('error', 'Sin conexión: los cambios quedan guardados acá y se suben cuando vuelva internet.');
+    } else if (err && (err.code === 'PGRST205' || err.code === '42P01')) {
+      setCloudStatus('error', 'Falta crear la tabla en Supabase: corré el archivo supabase/schema.sql en el SQL Editor.');
+    } else {
+      setCloudStatus('error', 'No se pudo sincronizar: ' + msg);
+    }
+  }
+
+  var CLOUD_LABELS = { off: 'Sin conectar', login: 'Falta iniciar sesión', syncing: 'Sincronizando…', ok: 'Sincronizado', error: 'Pendiente de sincronizar' };
+
+  function setCloudStatus(status, message) {
+    cloud.status = status;
+    cloud.message = message || '';
+    $('cloud-dot').dataset.status = status;
+    $('b-cloud').title = 'Nube: ' + CLOUD_LABELS[status];
+    var note = $('storage-note');
+    if (status === 'off') note.textContent = 'Los datos se guardan en este navegador. Descargá una copia cada tanto, o conectá la nube.';
+    else if (status === 'login') note.textContent = 'Nube conectada, pero falta iniciar sesión. Mientras tanto se guarda solo en este navegador.';
+    else if (status === 'error') note.textContent = cloud.message;
+    else note.textContent = 'Guardado en la nube' + (cloud.user ? ' (' + cloud.user.email + ')' : '') + (cloud.lastSync ? ' · ' + new Date(cloud.lastSync).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '');
+    if ($('dlg-cloud').open) renderCloudDialog();
+  }
+
+  function cloudConfig() { return load(CLOUD_CFG_KEY, null); }
+
+  function startCloud() {
+    var cfg = cloudConfig();
+    if (!cfg) { setCloudStatus('off'); return; }
+    if (!window.supabase) { setCloudStatus('error', 'No se pudo cargar Supabase (¿sin internet?). Los datos siguen guardados en este navegador.'); return; }
+    cloud.sb = window.supabase.createClient(cfg.url, cfg.key, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'cotizador-auth' } });
+    cloud.sb.auth.onAuthStateChange(function (event, session) {
+      var wasIn = !!cloud.user;
+      cloud.user = session ? session.user : null;
+      if (!cloud.user) { setCloudStatus('login'); return; }
+      // La bajada se hace después del evento: el cliente no permite otras llamadas adentro del callback.
+      if (!wasIn) setTimeout(function () { cloudRun(cloudPull); }, 0);
+    });
+    cloud.sb.auth.getSession().then(function (res) {
+      if (!res.data.session) setCloudStatus('login');
+    });
+  }
+
+  function renderCloudDialog() {
+    var cfg = cloudConfig();
+    $('cloud-config-form').hidden = !!cfg;
+    $('cloud-login-form').hidden = !cfg || !!cloud.user;
+    $('cloud-on').hidden = !cloud.user;
+    if (cloud.user) {
+      $('cloud-state').innerHTML =
+        '<div><b>Conectado como</b> ' + esc(cloud.user.email) + '</div>' +
+        '<div><b>Proyecto:</b> <span class="mono">' + esc(cfg.url.replace(/^https?:\/\//, '')) + '</span></div>' +
+        '<div><b>Estado:</b> ' + CLOUD_LABELS[cloud.status] + (cloud.lastSync ? ' · última vez ' + new Date(cloud.lastSync).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '') + '</div>' +
+        (cloud.message ? '<div class="form-error" style="margin-top:6px">' + esc(cloud.message) + '</div>' : '');
+    }
+  }
+
+  function showFormError(id, msg) {
+    $(id).textContent = msg;
+    $(id).hidden = !msg;
+  }
+
+  // Una clave JWT trae el rol adentro: si es service_role no se acepta.
+  function isSecretKey(key) {
+    if (/^sb_secret_/.test(key)) return true;
+    try { return JSON.parse(atob(key.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).role === 'service_role'; } catch (e) { return false; }
+  }
+
+  $('b-cloud').addEventListener('click', function () {
+    setMenuOpen(false);
+    showFormError('cl-config-error', '');
+    showFormError('cl-login-error', '');
+    renderCloudDialog();
+    $('dlg-cloud').showModal();
+  });
+
+  $('cloud-config-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var url = $('cl-url').value.trim().replace(/\/+$/, '');
+    var key = $('cl-key').value.trim();
+    if (!/^https:\/\/[^\s/]+$/.test(url)) return showFormError('cl-config-error', 'La URL tiene que ser como https://xxxxxxxx.supabase.co');
+    if (isSecretKey(key)) return showFormError('cl-config-error', 'Esa es la clave secreta (service_role). Pegá la clave pública: anon o publishable.');
+    save(CLOUD_CFG_KEY, { url: url, key: key });
+    showFormError('cl-config-error', '');
+    startCloud();
+    renderCloudDialog();
+    $('cl-email').focus();
+  });
+
+  $('cloud-login-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!cloud.sb) return showFormError('cl-login-error', 'No se pudo cargar Supabase. Revisá la conexión a internet y volvé a abrir la página.');
+    var btn = this.querySelector('[type=submit]');
+    btn.disabled = true;
+    showFormError('cl-login-error', '');
+    cloud.sb.auth.signInWithPassword({ email: $('cl-email').value.trim(), password: $('cl-pass').value }).then(function (res) {
+      btn.disabled = false;
+      if (res.error) {
+        var m = res.error.message || '';
+        return showFormError('cl-login-error', /invalid login/i.test(m) ? 'Email o contraseña incorrectos.' : /not confirmed/i.test(m) ? 'Ese usuario no está confirmado: en Supabase creálo con "Auto Confirm User".' : 'No se pudo entrar: ' + m);
+      }
+      $('cl-pass').value = '';
+      toast('Conectado: subiendo y bajando tus datos…');
+      renderCloudDialog();
+    });
+  });
+
+  $('dlg-cloud').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-cloud]');
+    if (!b) return;
+    var act = b.dataset.cloud;
+    if (act === 'sync') cloudRun(cloudPull).then(function () { if (cloud.status === 'ok') toast('Todo sincronizado'); });
+    if (act === 'logout') {
+      cloudRun(cloudPush).then(function () {
+        if (cloud.status === 'error' && !confirm('Hay cambios que no se pudieron subir. Si cerrás sesión quedan solo en este navegador. ¿Seguir?')) return;
+        var wipe = confirm('¿Borrar también los datos de este navegador? Siguen guardados en la nube.\n\nAceptar: borrar de este navegador · Cancelar: dejarlos');
+        return cloud.sb.auth.signOut().then(function () {
+          if (wipe) {
+            state.clients = []; state.products = []; state.quotes = []; state.company = Object.assign({}, DEFAULT_COMPANY); state.seq = 0;
+            Object.keys(KEYS).forEach(function (k) { save(KEYS[k], state[k]); });
+            save(CLOUD_SNAP_KEY, null);
+            newDraft();
+            loadDraftIntoForm();
+            refreshAfterSync();
+          }
+          toast('Sesión cerrada');
+        });
+      });
+    }
+    if (act === 'reset') {
+      if (!confirm('¿Desconectar este proyecto de Supabase? Los datos de este navegador no se borran.')) return;
+      (cloud.sb ? cloud.sb.auth.signOut() : Promise.resolve()).catch(function () {}).then(function () {
+        save(CLOUD_CFG_KEY, null);
+        cloud.sb = null;
+        cloud.user = null;
+        setCloudStatus('off');
+        renderCloudDialog();
+      });
+    }
+  });
+
+  // Al volver a la pestaña o recuperar internet se trae lo que cambió en otros dispositivos.
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && cloud.user && Date.now() - cloud.lastPull > 30000) cloudRun(cloudPull);
+  });
+  window.addEventListener('online', function () { if (cloud.user) cloudRun(cloudPull); });
+
   // ---------- Inicio ----------
   expireQuotes();
   newDraft();
@@ -2541,6 +2899,7 @@
   var startView = 'nueva';
   try { startView = localStorage.getItem('cotizador_vista') || 'nueva'; } catch (e) {}
   showView(document.getElementById('view-' + startView) ? startView : 'nueva');
+  startCloud();
 })();
 </script>
 </body>
