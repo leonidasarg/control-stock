@@ -1,24 +1,12 @@
-# Stock al Día
+# Cotizador
 
-Herramienta para calcular y registrar diferencias de stock por artículo y depósito (Chamical, Chepes, Villa Unión).
+Herramienta para armar cotizaciones, guardar clientes y productos, y hacer seguimiento de cada cotización.
 
 ## Cómo usarla
 
-Simplemente abrí `index.html` con doble clic (se abre en el navegador) o hacé clic derecho → Abrir con → tu navegador preferido.
+Abrí `index.html` con doble clic (se abre en el navegador). No necesita instalación, servidor ni conexión a internet salvo para cargar las tipografías.
 
-No necesita instalación, servidor ni conexión a internet salvo para cargar las tipografías. Los datos (historial de cálculos y catálogo de productos) se guardan en el almacenamiento local del navegador, así que quedan disponibles la próxima vez que la abras desde el mismo navegador y la misma PC.
-
-## Funcionalidad
-
-- Selección de depósito: Chamical, Chepes, Villa Unión.
-- Carga por código de producto (catálogo precargado con 287 artículos; se pueden agregar más desde el botón "Productos").
-- Cálculo automático: stock esperado = inicial + compras − ventas, comparado contra el stock contado.
-- Estado por color: verde (coincide), amarillo (sobra stock), rojo (falta stock).
-- Historial de cálculos por depósito, con buscador por código o nombre.
-
-## Cotizador
-
-Abrí `cotizador.html` (o tocá el botón **Cotizador** arriba a la derecha en Stock al Día). A la izquierda tenés el menú con las cuatro secciones (en el celular se abre con el botón ☰):
+A la izquierda tenés el menú con las cuatro secciones (en el celular se abre con el botón ☰):
 
 - **Clientes**: nombre o razón social, contacto, CUIT/DNI, condición de IVA, teléfono, email, dirección, localidad, provincia y notas.
 - **Productos**: código, nombre, unidad, costo y precio de venta. Si cargás costo y margen, el precio se calcula solo. Tiene un botón para aumentar todos los precios en un porcentaje.
